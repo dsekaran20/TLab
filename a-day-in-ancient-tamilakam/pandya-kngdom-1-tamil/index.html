@@ -1,448 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ta">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>முத்தும் பாடலும் — பாண்டிய நாட்டுத் தூதனின் பயணம்</title>
-    <meta
-      name="description"
-      content="சங்ககாலத் தமிழகம் சார்ந்த குறும் விளையாட்டு முன்மாதிரி. கடற்கரையிலிருந்து பாண்டிய அரசவைக்கு முத்துப் பையும் பாடலும் கொண்டு செல்லுங்கள்."
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Serif+Tamil:wght@500;600;700&family=Noto+Sans+Tamil:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <!-- Decorative palm-leaf grain background, pure CSS -->
-    <div class="palm-grain" aria-hidden="true"></div>
-    <div class="vignette" aria-hidden="true"></div>
-
-    <main class="stage" role="main">
-      <header class="topbar">
-        <div class="brand">
-          <svg
-            class="brand-mark"
-            viewBox="0 0 40 40"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-label="முத்தும் பாடலும்"
-          >
-            <!-- Stylized pearl + fish (Pandya emblem nod) without overt religious iconography -->
-            <circle cx="20" cy="14" r="5" fill="none" stroke="currentColor" stroke-width="1.4" />
-            <path
-              d="M6 26 Q20 16 34 26 Q20 36 6 26 Z"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.4"
-              stroke-linejoin="round"
-            />
-            <circle cx="26" cy="26" r="0.9" fill="currentColor" />
-          </svg>
-          <div class="brand-text">
-            <div class="brand-title">முத்தும் பாடலும்</div>
-            <div class="brand-sub">கொற்கையிலிருந்து மதுரைக்கு ஒரு தூதனின் பாதை</div>
-          </div>
-        </div>
-        <button
-          class="ghost-btn"
-          id="resetBtn"
-          data-testid="button-reset"
-          aria-label="பயணத்தை மீண்டும் தொடங்கு"
-        >
-          மீண்டும் தொடங்கு
-        </button>
-      </header>
-
-      <section class="layout">
-        <!-- Main narrative panel -->
-        <article class="scene-card" aria-live="polite">
-          <div class="scene-meta">
-            <span class="scene-no" id="sceneNo" data-testid="text-scene-number">காட்சி 01</span>
-            <span class="scene-dot" aria-hidden="true"></span>
-            <span class="scene-place" id="scenePlace" data-testid="text-scene-place">கொற்கை, முத்துக் கரை</span>
-          </div>
-          <h1 class="scene-title" id="sceneTitle" data-testid="text-scene-title">
-            அலை ஒரு பணியை கொண்டு வருகிறது
-          </h1>
-          <p class="scene-text" id="sceneText" data-testid="text-scene-narrative">
-            ஓலைச்சுவடி திறக்கப்படுகிறது…
-          </p>
-
-          <div class="choices" id="choices" data-testid="container-choices"></div>
-
-          <!-- Route progress -->
-          <div class="route" aria-label="பயண முன்னேற்றம்" data-testid="container-route">
-            <ol class="route-markers" id="routeMarkers"></ol>
-            <div class="route-line" aria-hidden="true"></div>
-          </div>
-        </article>
-
-        <!-- Status / inventory rail -->
-        <aside class="rail" aria-label="தூதனின் கணக்கு">
-          <div class="rail-section">
-            <div class="rail-heading">தூதன்</div>
-            <div class="rail-name" data-testid="text-courier-name">இளவன், கடற்கரைச் சிற்றூரைச் சேர்ந்தவன்</div>
-            <div class="rail-sub">பாண்டிய நாடு, தொடக்கச் சங்க காலம்</div>
-          </div>
-
-          <div class="rail-section">
-            <div class="rail-heading">கணக்கு</div>
-            <ul class="meters" id="meters" data-testid="container-meters">
-              <!-- meters populated by JS -->
-            </ul>
-          </div>
-
-          <div class="rail-section">
-            <div class="rail-heading">பை</div>
-            <ul class="inventory" id="inventory" data-testid="container-inventory">
-              <!-- inventory populated by JS -->
-            </ul>
-          </div>
-
-          <div class="rail-section disclaimer" data-testid="text-disclaimer">
-            சங்ககாலத் தமிழகம் தூண்டுதலாக அமைந்த வரலாற்றுப் புனைவு முன்மாதிரி. பெயர்கள், இடங்கள், பழக்கங்கள் நாடகத் தேவைக்காக மாற்றப்பட்டவை; இது ஆய்வறிஞர் மறுவடிவமைப்பு அல்ல.
-          </div>
-        </aside>
-      </section>
-
-      <footer class="footer">
-        <span class="footer-mark">~</span>
-        <span>குறும் செயற்பாட்டு வரைவு · ஆறு காட்சிகள் · உங்கள் தேர்வுகள் முடிவை மாற்றும்</span>
-        <span class="footer-mark">~</span>
-      </footer>
-    </main>
-
-    <script src="game.js"></script>
-  <script data-pplx-inline-edit>
-(function () {
-  if (window === window.top) return;
-
-  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
-  const MAX_FONT_BYTES = 500 * 1024;
-  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
-  let scrollForwarding = false;
-  let scrollRaf = 0;
-  let trustedTopOrigin = null;
-
-  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
-  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
-  // across multiple labels.
-  function matchesAllowedOrigin(origin) {
-    if (!origin) return false;
-    for (const entry of allowedParentOrigins) {
-      if (!entry.includes("*")) {
-        if (entry === origin) return true;
-        continue;
-      }
-      const pattern = new RegExp(
-        "^" +
-          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
-          "$",
-      );
-      if (pattern.test(origin)) return true;
-    }
-    return false;
-  }
-
-  // Trust decision: when the sender is same-origin-visible (event.origin is a
-  // real origin like https://www.perplexity.ai) we trust event.origin directly.
-  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
-  // broker's stamped `parentOrigin` to identify the top window. The fallback
-  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
-  // on the response path (see postToTrustedTop) to ensure replies can't be
-  // delivered to anyone but the actual top window of that claimed origin.
-  function getTrustedParentOrigin(event) {
-    const forwardedParentOrigin =
-      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
-    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
-    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
-  }
-
-  // All responses go to window.top with targetOrigin = the allowlisted origin.
-  // An attacker that iframes us inside their own null-origin broker can claim
-  // any parentOrigin they like, but the browser will drop the reply whenever
-  // the real top's origin doesn't match — so the screenshot never leaves.
-  function postToTrustedTop(message) {
-    if (!trustedTopOrigin) return;
-    try {
-      window.top.postMessage(message, trustedTopOrigin);
-    } catch (_error) {}
-  }
-
-  function inlineAll(original, clone) {
-    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
-
-    try {
-      const computedStyle = getComputedStyle(original);
-      // cssText on a computed style is the serialized declaration in modern
-      // Chromium/Safari — a single read beats enumerating ~400 longhand
-      // properties. Firefox returns "" here, so we fall back on empty.
-      const serialized = computedStyle.cssText;
-      if (serialized) {
-        clone.style.cssText = serialized;
-      } else {
-        const parts = new Array(computedStyle.length);
-        for (let index = 0; index < computedStyle.length; index += 1) {
-          const property = computedStyle[index];
-          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
-        }
-        clone.style.cssText = parts.join("");
-      }
-    } catch (_error) {}
-
-    const originalChildren = original.children;
-    const clonedChildren = clone.children;
-    for (
-      let index = 0;
-      index < originalChildren.length && index < clonedChildren.length;
-      index += 1
-    ) {
-      inlineAll(originalChildren[index], clonedChildren[index]);
-    }
-  }
-
-  function extractFontUrl(srcValue) {
-    const matches = [
-      ...srcValue.matchAll(
-        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
-      ),
-    ];
-    if (matches.length === 0) return null;
-    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
-    if (woff2) return woff2[1];
-    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
-    if (woff) return woff[1];
-    return matches[0][1];
-  }
-
-  // Cache resolved font URL -> data URI across captures. Fonts on a page
-  // essentially never change, and a batch run emits multiple captures back to
-  // back — without this we'd refetch + re-base64 every time.
-  const fontDataUriCache = new Map();
-  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
-
-  async function fetchAsDataUri(url) {
-    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
-    let dataUri = null;
-    try {
-      const response = await fetch(url, { mode: "cors", credentials: "omit" });
-      if (response.ok) {
-        const blob = await response.blob();
-        if (blob.size <= MAX_FONT_BYTES) {
-          dataUri = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () =>
-              resolve(typeof reader.result === "string" ? reader.result : null);
-            reader.onerror = () => resolve(null);
-            reader.readAsDataURL(blob);
-          });
-        }
-      }
-    } catch (_error) {
-      dataUri = null;
-    }
-    fontDataUriCache.set(url, dataUri);
-    return dataUri;
-  }
-
-  function collectFontFaceRuleTexts() {
-    const rules = [];
-    for (const sheet of document.styleSheets) {
-      let cssRules;
-      try {
-        cssRules = sheet.cssRules;
-      } catch (_error) {
-        continue;
-      }
-      if (!cssRules) continue;
-      for (const rule of cssRules) {
-        const cssText = rule.cssText || "";
-        if (cssText.startsWith("@font-face")) rules.push(cssText);
-      }
-    }
-    return rules;
-  }
-
-  async function buildInlinedFontCss() {
-    const ruleTexts = collectFontFaceRuleTexts();
-    if (ruleTexts.length === 0) return null;
-
-    const resolved = ruleTexts.map((cssText) => {
-      if (!SRC_DECLARATION_RE.test(cssText)) return null;
-      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
-      if (!srcMatch) return null;
-      const url = extractFontUrl(srcMatch[1]);
-      if (!url) return null;
-      try {
-        return { cssText, url: new URL(url, document.baseURI).href };
-      } catch (_error) {
-        return null;
-      }
-    });
-
-    const dataUris = await Promise.all(
-      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
-    );
-
-    const inlined = [];
-    let totalBytes = 0;
-    for (let index = 0; index < resolved.length; index += 1) {
-      const entry = resolved[index];
-      const dataUri = dataUris[index];
-      if (!entry || !dataUri) continue;
-      const approxBytes = dataUri.length * 0.75;
-      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
-      totalBytes += approxBytes;
-      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
-    }
-    return inlined.length > 0 ? inlined.join("\n") : null;
-  }
-
-  function stripExternal(clone) {
-    const images = clone.querySelectorAll("img");
-    for (let index = 0; index < images.length; index += 1) {
-      const src = images[index].getAttribute("src");
-      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
-    }
-
-    const elements = clone.querySelectorAll("*");
-    for (let index = 0; index < elements.length; index += 1) {
-      const style = elements[index].style.cssText;
-      if (style && style.includes("url(")) {
-        elements[index].style.cssText = style.replace(
-          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
-          "none",
-        );
-      }
-    }
-  }
-
-  function emitScroll() {
-    scrollRaf = 0;
-    if (!scrollForwarding) return;
-    postToTrustedTop({
-      type: "INLINE_EDIT_SCROLL",
-      scrollX: window.scrollX,
-      scrollY: window.scrollY,
-    });
-  }
-
-  window.addEventListener(
-    "scroll",
-    function () {
-      if (!scrollForwarding || scrollRaf) return;
-      scrollRaf = requestAnimationFrame(emitScroll);
-    },
-    { passive: true, capture: true },
-  );
-
-  async function handleCaptureRequest(event) {
-    const requestId = event.data.requestId;
-    const scrollX = window.scrollX;
-    const scrollY = window.scrollY;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    function postResult(dataUrl) {
-      postToTrustedTop({
-        type: "INLINE_EDIT_SCREENSHOT_RESULT",
-        requestId,
-        dataUrl,
-        scrollX,
-        scrollY,
-      });
-    }
-
-    try {
-      // Wait for any pending web fonts to resolve so both inline metrics and
-      // the @font-face inlining below see the same loaded faces.
-      if (document.fonts && document.fonts.ready) {
-        try {
-          await document.fonts.ready;
-        } catch (_error) {}
-      }
-
-      const clone = document.documentElement.cloneNode(true);
-      inlineAll(document.documentElement, clone);
-
-      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
-      for (let index = 0; index < removedNodes.length; index += 1) {
-        removedNodes[index].remove();
-      }
-
-      stripExternal(clone);
-
-      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
-      // can resolve them — external font URLs aren't fetched during
-      // foreignObject rendering, which would otherwise force a fallback face
-      // and change text metrics.
-      const inlinedFontCss = await buildInlinedFontCss();
-      if (inlinedFontCss) {
-        const styleEl = document.createElement("style");
-        styleEl.textContent = inlinedFontCss;
-        const head = clone.querySelector("head");
-        if (head) head.appendChild(styleEl);
-        else clone.insertBefore(styleEl, clone.firstChild);
-      }
-
-      const html = new XMLSerializer().serializeToString(clone);
-      const svg =
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
-        '<foreignObject width="100%" height="100%">' +
-        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
-        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
-        html +
-        "</div></div></foreignObject></svg>";
-      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-      const image = new Image();
-      image.onload = function () {
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        canvas.getContext("2d").drawImage(image, 0, 0);
-        postResult(canvas.toDataURL("image/png"));
-      };
-      image.onerror = function () {
-        postResult(null);
-      };
-      image.src = svgUrl;
-    } catch (_error) {
-      postResult(null);
-    }
-  }
-
-  window.addEventListener("message", function (event) {
-    if (!event.data) return;
-    // Only accept messages from the direct parent frame. Blocks sibling /
-    // unrelated-window postMessage senders that could otherwise reach us.
-    if (event.source !== window.parent) return;
-
-    const trustedParentOrigin = getTrustedParentOrigin(event);
-    if (!trustedParentOrigin) return;
-    trustedTopOrigin = trustedParentOrigin;
-
-    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
-      scrollForwarding = true;
-      emitScroll();
-      return;
-    }
-
-    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
-      scrollForwarding = false;
-      if (scrollRaf) cancelAnimationFrame(scrollRaf);
-      scrollRaf = 0;
-      return;
-    }
-
-    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
-
-    handleCaptureRequest(event);
-  });
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>முத்துக்களும் பாதையும்</title>
+  <style>
+    :root{--navy:#202a4a;--ink:#40392f;--muted:#796d5d;--paper:#fbf5e7;--paper2:#f2e5c8;--gold:#bf953b;--line:#d6c4a0;--shadow:rgba(71,51,25,.17)}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);background-color:#e8d8b4;background-image:linear-gradient(rgba(100,79,42,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(100,79,42,.055) 1px,transparent 1px);background-size:6px 6px;font-family:"Noto Serif Tamil","Nirmala UI",Latha,Georgia,serif;line-height:1.7}button{font:inherit}
+    .site-header{width:min(1130px,calc(100% - 32px));margin:0 auto;padding:26px 4px 20px;display:flex;justify-content:space-between;align-items:center;gap:20px}.brand{display:flex;align-items:center;gap:13px}.brand-mark{width:38px;height:38px;border:1px solid var(--navy);border-radius:50%;display:grid;place-items:center;color:var(--navy);font-size:19px}.brand h1{margin:0;color:var(--navy);font-size:1.55rem;font-weight:600;line-height:1.25}.brand p{margin:5px 0 0;color:var(--muted);font:.75rem/1.35 Arial,"Nirmala UI",sans-serif;letter-spacing:.08em}.header-actions{display:flex;align-items:center;gap:10px}.home-link,.restart{border:1px solid var(--navy);color:var(--navy);background:transparent;border-radius:999px;padding:10px 17px;font:.74rem Arial,"Nirmala UI",sans-serif;letter-spacing:.06em;cursor:pointer;text-decoration:none;white-space:nowrap}.home-link:hover,.home-link:focus,.restart:hover,.restart:focus{background:var(--navy);color:#fff}
+    .layout{width:min(1130px,calc(100% - 32px));margin:8px auto 30px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:25px;align-items:start}.story-card,.side-card{border:1px solid var(--line);background:rgba(251,245,231,.95);box-shadow:0 10px 25px var(--shadow)}.story-card{border-radius:13px;overflow:hidden}.story-top{padding:33px 37px 18px;border-bottom:1px solid #e5d8bf}.eyebrow{margin:0 0 13px;color:#987733;font:700 .72rem Arial,"Nirmala UI",sans-serif;letter-spacing:.11em}.eyebrow span{color:#83745f;font-weight:400}#scene-title{margin:0;color:var(--navy);font-size:clamp(2rem,4vw,3rem);line-height:1.28;font-weight:600}.scene-place{margin:10px 0 0;color:var(--muted);font:.88rem "Nirmala UI",Arial,sans-serif;letter-spacing:.02em}
+    .story-body{padding:30px 37px 14px}.story-body p{margin:0 0 18px;font-size:1.1rem;line-height:1.85}.lesson{margin:25px 0;padding:20px 22px;background:rgba(236,222,190,.48);border-left:3px solid var(--gold)}.lesson .tamil{margin:0 0 10px;color:var(--navy);font-size:1.13rem;line-height:1.9}.lesson .meaning{margin:0;color:#64584b;font-size:1rem;line-height:1.72}.lesson .lesson-label{margin:0 0 9px;color:#987733;font:700 .72rem Arial,"Nirmala UI",sans-serif;letter-spacing:.08em}
+    .choices{padding:3px 37px 24px;display:grid;gap:11px}.choice{width:100%;text-align:left;cursor:pointer;padding:16px 18px;border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.3);color:var(--ink);transition:border-color .15s,transform .15s,background .15s}.choice:hover,.choice:focus{border-color:var(--navy);background:#fffaf0;transform:translateY(-1px)}.choice .label{display:block;font-size:1.03rem;line-height:1.5}.choice .label::before{content:"◆";color:var(--gold);font-size:.7rem;padding-right:13px;vertical-align:2px}
+    .transition{padding:42px 28px;text-align:center;background:linear-gradient(180deg,rgba(224,204,163,.55),rgba(251,245,231,.95));border-top:1px solid #e1d3b7;border-bottom:1px solid #e1d3b7}.transition .step{margin:0 0 10px;color:#987733;font:700 .72rem Arial,"Nirmala UI",sans-serif;letter-spacing:.12em}.transition .transition-text{max-width:570px;margin:18px auto 20px;color:#625747;font-size:1.04rem;line-height:1.8;text-align:left}.transition .transition-text p{margin:0 0 16px}.transition .next-place{margin:24px auto 18px;color:var(--navy);font-size:1.05rem;line-height:1.55}.transition .next-place small{display:block;margin-bottom:4px;color:#987733;font:700 .7rem Arial,"Nirmala UI",sans-serif;letter-spacing:.08em}.continue{border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:999px;padding:12px 19px;cursor:pointer;font:.75rem Arial,"Nirmala UI",sans-serif;letter-spacing:.05em}.continue:hover,.continue:focus{opacity:.86}
+    .progress{margin:0 37px;padding:22px 5px 26px;border-top:1px solid #e7dcc7}.route{display:flex;align-items:flex-start;justify-content:space-between;position:relative;gap:2px}.route::before{content:"";position:absolute;top:7px;left:3%;right:3%;border-top:1px dashed #bcae90}.stop{position:relative;z-index:1;width:16.3%;text-align:center;color:#8a7d68;font:.59rem Arial,"Nirmala UI",sans-serif;letter-spacing:.02em}.dot{display:block;width:14px;height:14px;margin:0 auto 9px;border:1px solid #aa9875;border-radius:50%;background:var(--paper2)}.stop.done .dot{background:var(--gold);border-color:var(--gold)}.stop.current .dot{background:var(--navy);border-color:var(--navy);box-shadow:0 0 0 3px rgba(32,42,74,.13)}.stop.current{color:var(--navy);font-weight:700}
+    .sidebar{display:grid;gap:18px}.side-card{padding:18px;border-radius:12px;box-shadow:0 8px 20px rgba(71,51,25,.11)}.side-label{margin:0 0 10px;color:#987733;font:700 .7rem Arial,"Nirmala UI",sans-serif;letter-spacing:.1em}.side-main{margin:0;color:var(--navy);font-size:1.1rem;line-height:1.55}.side-muted{margin:5px 0 0;color:var(--muted);font:.83rem "Nirmala UI",Arial,sans-serif;line-height:1.45}.poem-card{background:rgba(250,243,226,.91)}.poem-progress{margin:0 0 9px;color:var(--muted);font:.8rem "Nirmala UI",Arial,sans-serif}.poem-lines{margin:0;color:var(--navy);font-size:1rem;line-height:1.8}.tiny-note{color:#766b5b;font:.8rem/1.65 "Nirmala UI",Arial,sans-serif;border:1px dashed #c9b58a;background:rgba(248,239,219,.48)}.ending-actions{display:flex;flex-wrap:wrap;gap:10px;padding:3px 37px 28px}.action{border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:999px;padding:11px 17px;cursor:pointer;font:.75rem Arial,"Nirmala UI",sans-serif;letter-spacing:.04em}.action.secondary{background:transparent;color:var(--navy)}.action:hover,.action:focus{opacity:.85}footer{padding:2px 18px 26px;text-align:center;color:#786b56;font:.76rem "Nirmala UI",Arial,sans-serif;letter-spacing:.04em}
+    @media(max-width:830px){.layout{grid-template-columns:1fr}.sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar .poem-card,.sidebar .tiny-note{grid-column:1/-1}}@media(max-width:580px){.site-header,.layout{width:min(100% - 24px,1130px)}.site-header{align-items:flex-start;padding-top:18px}.brand-mark{display:none}.brand h1{font-size:1.35rem}.header-actions{gap:7px;flex-direction:column;align-items:flex-end}.home-link,.restart{padding:8px 10px;font-size:.62rem}.story-top{padding:25px 21px 17px}.story-body{padding:25px 21px 11px}.choices{padding:3px 21px 18px}.progress{margin:0 21px;padding-bottom:21px}.story-body p{font-size:1.04rem}.sidebar{grid-template-columns:1fr}.sidebar .poem-card,.sidebar .tiny-note{grid-column:auto}.stop{font-size:.48rem}.ending-actions{padding:3px 21px 24px}.transition{padding:36px 21px}}
+  </style>
+</head>
+<body>
+<header class="site-header"><div class="brand"><div class="brand-mark">◌</div><div><h1>முத்துக்களும் பாதையும்</h1><p>கொற்கையிலிருந்து மதுரைக்குச் செல்லும் இளம் வணிகரின் பயணம் · கி.மு. 30 சுமார்</p></div></div><div class="header-actions"><a class="home-link" href="https://tlab.projectxp.workers.dev/" aria-label="தமிழ் லேப் முகப்புப் பக்கத்திற்குத் திரும்புக">TLab முகப்பு</a><button class="restart" id="restartTop" type="button">பயணத்தை மீண்டும் தொடங்கு</button></div></header>
+<main class="layout"><section class="story-card" aria-live="polite"><div class="story-top"><p class="eyebrow" id="sceneMeta"></p><h2 id="scene-title"></h2><p class="scene-place" id="scenePlace"></p></div><div class="story-body" id="storyBody"></div><div class="choices" id="choices"></div><div class="ending-actions" id="endingActions" hidden></div><div class="progress"><div class="route" id="route" aria-label="பயண முன்னேற்றம்"></div></div></section>
+<aside class="sidebar"><section class="side-card"><p class="side-label">பயணிகள்</p><p class="side-main">இளவன் மற்றும் ஆண்டை</p><p class="side-muted">முத்துக் கரையான கொற்கையிலிருந்து</p></section><section class="side-card"><p class="side-label">காலமும் இடமும்</p><p class="side-main">பாண்டிய நாடு, கி.மு. 30 சுமார்</p><p class="side-muted">சுமார் 2,000 ஆண்டுகளுக்கு முன்பு</p></section><section class="side-card poem-card"><p class="side-label">புறநானூறு 192</p><p class="poem-progress" id="poemProgress"></p><p class="poem-lines" id="poemLines">பாடல் வரிகள் பயணத்தில் கற்கப்படும்.</p></section><section class="side-card tiny-note">இது வரலாற்றை அடிப்படையாகக் கொண்ட புனைகதை. இதன் காலப்பின்னணி கி.மு. <strong>30</strong> சுமார்; அதாவது சுமார் 2,000 ஆண்டுகளுக்கு முன்பிருந்த பாண்டிய நாட்டின் உலகம். சங்க இலக்கியங்களின் துல்லியமான கால நிர்ணயம் குறித்து அறிஞர்களிடையே வேறுபட்ட கருத்துகள் உள்ளன. <em>புறநானூறு</em> பொதுவாக கி.மு. இறுதி நூற்றாண்டுகளுக்கும் கி.பி. தொடக்க நூற்றாண்டுகளுக்கும் இடைப்பட்ட சங்கக் காலப் படைப்பாகக் கருதப்படுகிறது. இக்கதை, பாடல் கி.மு. 30-இல் துல்லியமாகப் பாடப்பட்டது என்று கூறவில்லை; அதை ஒரு இலக்கியத் தொடராகப் பயன்படுத்துகிறது. இப்பாடல் புறநானூறு 192; பாடியவர் கணியன் பூங்குன்றனார் என மரபில் கூறப்படுகிறது.</section></aside></main>
+<footer>~ ஒரு சிறிய ஊடாடும் கதை ~</footer>
+<script>
+(()=>{'use strict';
+const initialState=()=>({scene:0,learned:0});let state=initialState();
+const route=['கொற்கை','உள்நாட்டுப் பாதை','ஆற்றுக் கடப்பு','பனைத் தோப்பு','மதுரைச் சந்தை','அரண்மனை வளாகம்'];
+const poemLessons=[
+{tamil:'யாதும் ஊரே; யாவரும் கேளிர்;',meaning:'எல்லா ஊர்களும் நமக்குரிய ஊர்கள்; எல்லா மக்களும் நமக்கு உறவினர்கள்.'},
+{tamil:'தீதும் நன்றும் பிறர்தர வாரா;\nநோதலும் தணிதலும் அவற்றோ ரன்ன;',meaning:'நன்மையும் தீமையும் பிறரால் மட்டும் வருவதில்லை. துன்பமும் அதன் தணிவும் வாழ்க்கையின் ஒரு பகுதியே.'},
+{tamil:'சாதலும் புதுவது அன்றே; வாழ்தல்\nஇனிதுஎன மகிழ்ந்தன்றும் இலமே; முனிவின்,\nஇன்னா தென்றலும் இலமே;',meaning:'மரணம் புதிதல்ல. இன்பக் காலங்களில் அளவுக்கு மீறி மகிழ வேண்டாம்; துன்பக் காலங்களில் மனம் தளரவும் வேண்டாம்.'},
+{tamil:'மின்னொடு வானம் தண்துளி தலைஇ, ஆனாது\nகல்பொருது இரங்கும் மல்லற் பேர்யாற்று\nநீர்வழிப் படூஉம் புணைபோல, ஆருயிர்',meaning:'மின்னலும் மழையும் கடந்த பின், பாறைகளைக் கடந்து ஓடும் பெருஞ்சாற்றில் ஒரு தெப்பம் நீரோட்டத்தோடு செல்லும். நம் உயிரும் வாழ்க்கையில் அவ்வாறே பயணிக்கிறது.'},
+{tamil:'முறைவழிப் படூஉம் என்பது திறவோர்\nகாட்சியின் தெளிந்தனம் ஆகலின், மாட்சியின்\nபெரியோரை வியத்தலும் இலமே;\nசிறியோரை இகழ்தல் அதனினும் இலமே.',meaning:'வாழ்க்கை தன் வழியில் நகர்கிறது என்பதை அறிந்தோர் தெளிவாக உணர்கிறார்கள். வலிமை மிக்கவரைக் கண்டு வியந்து போகாதே; சாதாரண மக்களை இகழாதே.'}
+];
+const lessonBox=i=>{const l=poemLessons[i];return `<section class="lesson"><p class="lesson-label">ஆண்டை உனக்குக் கற்றுத்தருகிறாள்</p><p class="tamil">${l.tamil.replace(/\n/g,'<br>')}</p><p class="meaning">${l.meaning}</p></section>`};
+const scenes=[
+{title:'கொற்கையை விட்டு முத்துக்கள் புறப்படுகின்றன',place:'முத்துக் கரையான கொற்கை · கி.மு. 30 சுமார்',paragraphs:['விடியற்காலையில் முத்துப் பாறைகளிலிருந்து மூழ்காளர்கள் திரும்புகிறார்கள். கடற்பறவைகள் மேலே வட்டமிட, அவர்களின் படகுகள் வெளிர் நீரில் கரையை நோக்கி வருகின்றன.','உன் வழிகாட்டியான ஆண்டை, சிறந்த முத்துக்களை ஒரு கருநிறத் துணியில் பிரித்து வைக்கிறாள். சில சிறியவை. சில ஒழுங்கற்ற வடிவம் கொண்டவை. சில மட்டும் உருண்டையாகவும் ஒளிவீசுவதாகவும் உள்ளன; அவை நுணுக்கமான அணிகலன்களாக மாறத் தகுந்தவை.','அவள் தேர்ந்தெடுத்த முத்துக்களை ஒரு மூடிய பையில் வைக்கிறாள். “இவை மதுரையில் உள்ள நகை வியாபாரி நல்லூரிடம் செல்கின்றன,” என்று அவள் கூறுகிறாள். “அவர் அவற்றைப் பார்த்து ஏற்றுக்கொள்வார்; பின்னர் அவற்றைக் கொண்டு தனது வாடிக்கையாளர்களுக்காக அணிகலன்கள் செய்வார்.”','“அவற்றை யார் அணிவார்கள்?” என்று நீ கேட்கிறாய்.','“நீயே சென்று பார்க்கலாம்,” என்கிறாள் ஆண்டை. “இன்று நீ என்னுடன் பயணம் செய்கிறாய்.”'],choices:[
+{label:'புறப்படுவதற்கு முன் ஆண்டைக்கு முத்துக்களைப் பிரித்துத் தர உதவு.',learn:1,transition:`<p>நீயும் ஆண்டையும் காலை நேரப் பிடிப்பை பிரித்து முடிக்கிறீர்கள். மிகவும் ஒளிவீசும், உருண்டையான முத்துக்களைச் சேர்ந்து மூடிய பையில் வைக்கிறீர்கள்.</p><p>ஆண்டை முடிச்சைச் சரிபார்த்துவிட்டு கடலை ஒருமுறை பார்க்கிறாள்.</p><p>“புறப்படும் முன் இதை நினைவில் வைத்துக்கொள்,” என்று அவள் கூறுகிறாள்.</p>${lessonBox(0)}<p>அவள் பின்னால் நீ அந்த வரிகளைச் சொல்கிறாய். ஆண்டை தனது பயணப் பொதியை எடுத்துக்கொண்டு உள்நோக்கி நடக்கத் தொடங்குகிறாள். விரைவில் கடலின் ஒலி பின்னால் மறைகிறது.</p>`},
+{label:'ஒரு பழைய பாடலின் முதல் வரியைக் கற்றுத்தரச் ஆண்டையிடம் கேள்.',learn:1,transition:`<p>புறப்படுவதற்கு முன், ஆண்டை அந்த முதல் வரியை உன்னுடன் சேர்ந்து சொல்லிக் கற்றுத்தருகிறாள்.</p>${lessonBox(0)}<p>“பயணம் செய்பவருக்கு இந்த எண்ணம் தேவை,” என்று அவள் கூறுகிறாள்.</p><p>கரையிலிருந்து அவளைப் பின்தொடர்ந்து செல்லும்போது, அந்த வார்த்தைகள் உன் மனதில் தங்குகின்றன. விரைவில் கடலின் ஒலி பின்னால் மறைகிறது.</p>`},
+{label:'வெயில் கடுமையாவதற்கு முன் அதிகாலையிலேயே புறப்படு.',learn:1,transition:`<p>சூரியன் கடுமையாவதற்கு முன்பே நீ கொற்கையை விட்டு புறப்படுகிறாய். முத்துப் பை ஆண்டையிடம் பாதுகாப்பாக உள்ளது; பாதை அமைதியாக உள்ளது.</p><p>சிறிது நேரம் நடந்த பின் ஆண்டை பேசுகிறாள்.</p>${lessonBox(0)}<p>“உன் சொந்த ஊரை விட்டு முதன்முறையாகப் புறப்படுகிறாய்,” என்று அவள் கூறுகிறாள். “பாதையில் சந்திக்கும் மக்களை நினைக்கும்போது இந்த வரிகளை நினைவில் கொள்.”</p><p>காலை செல்லச் செல்ல கடல் மேலும் தொலைவாகிறது.</p>`}
+]},
+{title:'உள்நாட்டுப் பாதை',place:'முத்துக் கரையைத் தாண்டிய வறண்ட பாதை',paragraphs:['கடல் பின்னால் மறைகிறது. புதர்கள், வறண்ட வயல்கள், சிறிய குடியிருப்புகள் வழியாகப் பாதை செல்கிறது. நிலத்திலிருந்து வெப்பம் எழுகிறது.','உங்களை ஒரு வணிக வண்டி கடந்து வருகிறது. அதில் உப்பு, துணி, எண்ணெய் குடுவைகள் மதுரையை நோக்கிச் செல்கின்றன. அதன் ஓட்டுநர் நீங்கள் எங்கே செல்கிறீர்கள் என்று கேட்கிறார்.','“முத்துக்களை நியாயமாக விற்று, மூழ்காளர்கள் உழைத்ததற்குரிய தொகையைத் திரும்பக் கொண்டு செல்ல,” என்று ஆண்டை நேராகப் பதிலளிக்கிறாள்.','வண்டியோட்டி தலையசைக்கிறார். “வாக்கைக் காப்பவர்கள் இருக்கும் இடத்தில்தான் நல்ல பாதை உருவாகிறது.”'],choices:[
+{label:'வணிக வண்டியோடு நடந்து, வணிகரின் கதைகளைக் கேள்.',learn:2,transition:`<p>நீ வண்டிக்கு அருகில் நடக்கிறாய். சந்தைகள், சரியான எடைகள், உடைந்த வாக்குறுதிகள், நீண்ட பாதைகள் பற்றி வணிகர் பேசுகிறார்.</p><p>வண்டி வேறு வழியில் திரும்பியபின் ஆண்டை உன்னைப் பார்க்கிறாள்.</p><p>“சிலர் உனக்கு உதவுவார்கள்; சிலர் உதவமாட்டார்கள். ஆனால் ஒவ்வொரு நன்மையும் பிறரிடமிருந்தே வருகிறது என்றும், ஒவ்வொரு துன்பமும் பிறரால்தான் வருகிறது என்றும் நினைக்காதே,” என்று அவள் கூறுகிறாள்.</p>${lessonBox(1)}<p>ஓடும் நீரின் ஒலி கேட்கும் திசையை நோக்கிப் பாதை இறங்குகிறது; நீ அந்த வரிகளைத் திரும்பச் சொல்கிறாய்.</p>`},
+{label:'வண்டியின் நிழலில் சிறிது நேரம் பயணம் செய்.',learn:2,transition:`<p>வண்டியின் நிழல் வெப்பத்திலிருந்து உனக்கு ஓய்வு தருகிறது. சக்கரங்களின் ஒலியைக் கேட்டு, வறண்ட நிலம் மெதுவாகக் கடந்து செல்வதைப் பார்க்கிறாய்.</p><p>ஆற்றுக் கடப்பருகே இறங்கும்போது ஆண்டை சொல்கிறாள்: “நாள் வெப்பமாக இருக்கும்போது சிறிது நிழல்கூட பெரிய அதிர்ஷ்டம் போலத் தோன்றும். ஆனால் அது என்றும் நீடிக்காது.”</p>${lessonBox(1)}<p>முன்னால் மறைந்திருக்கும் கற்கள் மீது ஆறு வேகமாக ஓடுகிறது.</p>`},
+{label:'ஆண்டையின் வேகத்துக்கு ஈடுகொடுக்க முடியும் என்பதை காட்ட வேகமாக முன்னால் நட.',learn:2,transition:`<p>பயணத்துக்குத் தயாராக இருக்கிறாய் என்பதை ஆண்டைக்கு காட்ட வேண்டும் என்று நீ வேகமாக முன்னால் நடக்கிறாய். ஆனால் வெப்பம் விரைவில் உன் தோள்களைச் சோர்வடையச் செய்கிறது.</p><p>ஆண்டை உன்னை அடைந்ததும் கண்டிக்காமல் தண்ணீர் தருகிறாள்.</p><p>“கடினமான பாதை எப்போதும் மற்றொருவரின் தவறால் வருவதில்லை,” என்று அவள் கூறுகிறாள். “உதவி எதிர்பாராத நேரத்திலும் கிடைக்கலாம்.”</p>${lessonBox(1)}<p>நீங்கள் இருவரும் சேர்ந்து ஆற்றை நோக்கிச் செல்கிறீர்கள்.</p>`}
+]},
+{title:'கற்களைக் கடக்கும் நீர்',place:'உள்நாட்டுப் பாதையில் ஒரு ஆற்றுக் கடப்பு',paragraphs:['பிற்பகலில் நீங்கள் ஒரு ஆற்றுக் கடப்பை அடைகிறீர்கள். சமீபத்திய மழையால் நீர் வேகமாகவும் பழுப்பு நிறமாகவும் ஓடுகிறது. கற்கள் நீருக்குள் மறைந்து மீண்டும் தோன்றுகின்றன.','ஒரு படகோட்டி பயணிகளை தட்டையான மரப்படகில் கடத்திச் செல்கிறார். கடப்பதற்கு சிறிது கட்டணம் உண்டு; மேலே உள்ள ஆழமில்லா கடப்பு இலவசம், ஆனால் கடினமானது.','ஒரு சிறிய தெப்பம் கல்லில் மோதி திரும்பி மீண்டும் நகர்வதை ஆண்டை பார்க்கிறாள். “ஆற்றைக் கவனி,” என்று அவள் கூறுகிறாள். “அது நமக்குக் கற்றுத்தருவது உண்டு.”'],choices:[
+{label:'படகோட்டிக்குக் கட்டணம் கொடுத்து முத்துப் பையை உலர்வாகப் பாதுகாத்துக்கொள்.',learn:3,transition:`<p>படகோட்டி உங்களை பாதுகாப்பாகக் கடத்துகிறார். பழுப்பு நீரின் மீது படகு நகரும்போது, ஆண்டை முத்துப் பையை நெருக்கமாகப் பிடித்துக்கொள்கிறாள்.</p><p>மறுகரையை அடைந்தபின் நீ நிம்மதியாக மூச்சுவிடுகிறாய்.</p><p>“பாதுகாப்பாக இருப்பது நல்லது,” என்று ஆண்டை சொல்கிறாள். “ஆனால் ஒரு எளிய கடப்பு, எல்லாப் பாதைகளும் எளிதாக இருக்கும் என்று அர்த்தமல்ல.”</p>${lessonBox(2)}<p>இருள் இறங்கும் வானத்தின் கீழ் பாதை தொடர்கிறது.</p>`},
+{label:'நீரோட்டம் குறையும் வரை காத்திருந்து கவனமாகக் கட.',learn:3,transition:`<p>கற்கள் தெளிவாகத் தெரியும்வரை நீயும் ஆண்டையும் காத்திருக்கிறீர்கள். காலடியைக் கவனமாக வைத்து, கால்களைச் சுற்றி நீர் அழுத்தும்போது ஆற்றைக் கடக்கிறீர்கள்.</p><p>மறுகரையில் ஆண்டை புன்னகைக்கிறாள்.</p><p>“ஆறு வலிமையாக இருந்தபோது நீ அவசரப்படவில்லை. அந்த உணர்வை நினைவில் வைத்துக்கொள். கடினமான நேரம் கடந்து போகும்; எளிதான நேரமும் அப்படியே கடந்து போகும்,” என்று அவள் கூறுகிறாள்.</p>${lessonBox(2)}<p>ஆற்றை விட்டு நீங்கள் நடக்கத் தொடங்கும்போது மாலை ஆரம்பமாகிறது.</p>`},
+{label:'உடனே மேலே உள்ள ஆழமில்லா கடப்பில் முயற்சி செய்.',learn:3,transition:`<p>ஆறு அமைதியாகும் முன்பே நீ மேலே உள்ள கடப்பில் இறங்குகிறாய். கற்கள் காலுக்குக் கீழே நகர்கின்றன; குளிர்ந்த நீர் உன் உடைகளை நனைக்கிறது.</p><p>சோர்வாகவும் சங்கடமாகவும் மறுகரையை அடைகிறாய். ஆண்டை உன்னை நிலைநிறுத்த உதவுகிறாள்.</p><p>“ஒரு மோசமான கடப்பு உன்னைத் தோற்கடிக்க விடாதே,” என்று அவள் கூறுகிறாள். “ஒரு நல்ல கடப்பு உன்னை அலட்சியமாகவும் ஆக்க விடாதே.”</p>${lessonBox(2)}<p>பனை மரங்களை நோக்கி நீங்கள் நடக்கும்போது கடைசி ஒளியும் மங்குகிறது.</p>`}
+]},
+{title:'பனைத் தோப்பில் இரவு',place:'மதுரைக்குத் தெற்கே உள்ள வழிப்போக்கர் தோப்பு',paragraphs:['இரவில் நீங்கள் பனைமரங்களின் கீழ் தங்குகிறீர்கள். சந்தைக்குப் பூக்களைக் கொண்டு செல்லும் ஒரு பெண், சிறிய யாழுடன் ஒரு இசைக்கலைஞர், உறவினர்களைக் காணச் செல்லும் ஒரு குடும்பம் ஆகியோர் நெருப்பைச் சுற்றி இருக்கிறார்கள்.','அவர்கள் வெவ்வேறு இடங்களிலிருந்து வந்தவர்கள். ஆனால் ஒவ்வொருவரும் ஏதோ ஒன்றைப் பகிர்கிறார்கள்: தண்ணீர், கதை, பாடல், அல்லது நெருப்பருகே உட்கார இடம்.','உனக்குப் பாடல்கள் தெரியுமா என்று இசைக்கலைஞர் கேட்கிறார். ஆண்டை உன்னைப் பார்க்கிறாள். அவள் கற்றுத்தந்தவற்றை நினைவுகூர வேண்டிய நேரம் இது.'],choices:[
+{label:'உனக்குத் தெரிந்த வரிகளைச் சொல்லி, இசைக்கலைஞரின் பதிலை கேள்.',learn:4,transition:`<p>உனக்குத் தெரிந்த வரிகளை நீ சொல்கிறாய்; இசைக்கலைஞர் யாழில் ஒரு இசையால் பதிலளிக்கிறார். நெருப்பருகே அந்தப் பாடல் வேறுவிதமாக ஒலிக்கிறது—பழமையானதாகவும் விரிவானதாகவும் உயிர்ப்புள்ளதாகவும்.</p><p>விடியற்காலைக்கு முன், பனை வேர்களுக்கு இடையில் ஓடும் கடைசி மழைநீரை ஆண்டை சுட்டிக்காட்டுகிறாள்.</p><p>“ஆற்றை நினைவிருக்கிறதா?” என்று அவள் கேட்கிறாள். “இந்தப் பாடலும் அதை நினைவில் வைத்திருக்கிறது.”</p>${lessonBox(3)}<p>விடிந்ததும் நீயும் ஆண்டையும் தோப்பை விட்டு மதுரையை நோக்கிச் செல்கிறீர்கள்.</p>`},
+{label:'குடும்பத்தினருக்கு இரவு உணவு தயாரிக்க உதவு.',learn:4,transition:`<p>நீ தண்ணீர் எடுக்க உதவி செய்து, நெருப்பருகே உணவைப் பகிர்ந்துகொள்கிறாய். காலையில் அந்தப் பயணிகள் அந்நியர்களாகத் தோன்றவில்லை.</p><p>ஒவ்வொருவரும் புறப்படத் தயாராகும்போது, வெவ்வேறு திசைகளில் பிரியும் பாதைகளை ஆண்டை பார்க்கிறாள்.</p><p>“நாம் ஒவ்வொருவரும் முன்னோக்கிச் செல்கிறோம்,” என்று அவள் கூறுகிறாள். “சில நேரம் நம் தேர்வால்; சில நேரம் பாதையின் ஓட்டத்தால்.”</p>${lessonBox(3)}<p>நன்றியும் விடைபெறலும் முடிந்தபின், நீயும் ஆண்டையும் மதுரைக்கான கடைசி பயணத்தைத் தொடங்குகிறீர்கள்.</p>`},
+{label:'மதுரைக்குத் தயாராக அதிகாலையிலேயே உறங்கிவிடு.',learn:4,transition:`<p>நீ பனைமரங்களின் கீழ் ஆழ்ந்த உறக்கம் கொள்கிறாய். தோப்பு அமைதியாக இருக்கும்போதே ஆண்டை உன்னை எழுப்புகிறாள்.</p><p>பனித்துளிகள் நிலத்தில் மின்னுகின்றன. தூரத்தில் கற்கள் மீது ஓடும் நீரின் ஒலி கேட்கிறது.</p><p>“இருளிலும் ஆறு ஓடிக்கொண்டே இருக்கிறது,” என்று ஆண்டை கூறுகிறாள். “நாமும் அப்படித்தான்.”</p>${lessonBox(3)}<p>புதிய உற்சாகத்துடன் மதுரைக்கான கடைசி பாதையில் நீ நடக்கத் தொடங்குகிறாய்.</p>`}
+]},
+{title:'முத்துக்கள் தங்கள் வழியைக் கண்டடைகின்றன',place:'மதுரையின் சந்தைத் தெரு',paragraphs:['நண்பகலுக்குள் நீயும் ஆண்டையும் மதுரைக்குள் நுழைகிறீர்கள். கொற்கையைவிட நகரம் அதிக ஒலியுடன் இருக்கிறது. குறுகிய தெருக்களில் வண்டிகள் கிறீச்சிடுகின்றன. தானியம், துணி, பூக்கள், நறுமணப் பொருட்கள், எண்ணெய், உலோகப் பொருட்கள் ஆகியவற்றின் விலைகளை விற்பனையாளர்கள் கூவுகிறார்கள்.','ஆண்டை உன்னை நல்லூரின் நகைக்கடைக்கு அழைத்துச் செல்கிறாள். சிறிய விளக்குகள் மணிகள், தங்கக் கம்பிகள், சிப்பிகள், பளபளப்பான கற்கள் நிறைந்த தட்டுகளில் ஒளிர்கின்றன. நல்லூர் மூடிய முத்துப் பையைத் திறந்து முத்துக்களை கருநிறத் துணியில் வைக்கிறார்.','ஒன்றன்பின் ஒன்றாக அவற்றை வெளிச்சத்தில் திருப்பிப் பார்க்கிறார். “நல்ல முத்துக்கள்,” என்கிறார். “உருண்டையாகவும் சுத்தமாகவும் உள்ளன. இவை அழகிய அணிகலன்களாக மாறும்.” அவர் அவற்றை எடைபோட்டு, நியாயமான விலைக்கு ஒப்புக்கொண்டு, ஆண்டையிடம் பணம் உள்ள சிறிய துணிப்பையைத் தருகிறார்.','நீ முத்துக்களைப் பார்த்துக்கொண்டே இருக்கிறாய். “அவற்றை யார் அணிவார்கள்?” என்று கேட்கிறாய்.','நல்லூர் புன்னகைக்கிறார். “பலவிதமான மக்கள். ஒரு வணிகரின் மனைவி காதுகளில் அல்லது கூந்தலில் முத்துக்களை அணியலாம். அவர்களின் குடும்பம் சந்தைத்தெரு அருகில், கடையின் மேல்தளத்தில் அல்லது பரபரப்பான முற்றத்துக்குப் பின்னால் வசிக்கலாம். அவர்கள் துணி, நறுமணப் பொருட்கள், உப்பு, உலோகப் பொருட்கள் அல்லது தானியம் விற்பார்கள். விருந்தினர்கள் வரும்போது, திருமணங்களில், விழாக்களில் அவர்கள் சிறந்த அணிகலன்களை அணிவார்கள்.”','சிறிய தங்க அமைப்புகளை நீ சுட்டிக்காட்டுகிறாய். “இவை?”','“இவை ஒரு மணப்பெண்ணின் காதணிகளாக மாறலாம்,” என்கிறார் நல்லூர். “அவளின் குடும்பம் மதுரைக்கு வெளியே உள்ள ஒரு வேளாண் கிராமத்திலிருந்து வந்திருக்கலாம். திருமணம் பல குடும்பங்களை ஒன்றாகக் கொண்டுவரும். நகை என்பது அழகு மட்டுமல்ல. அது பரிசு, நினைவு, சில நேரங்களில் ஒரு குடும்பத்தின் சேமிப்பும் கூட.”','மெல்லிய தங்க இலைகளுக்கு அருகில் ஒரு தொழிலாளர் முத்துக்களைக் கோர்த்துக்கொண்டிருக்கும் பெரிய தட்டைப் பார்க்கிறாய். “அரண்மனையில் யாராவது இவற்றை அணிவார்களா?”','“இருக்கலாம்,” என்கிறார் நல்லூர். “சில முத்துக்கள் அரச குடும்பத்துக்கு சேவை செய்பவர்களிடம் செல்லலாம். சில அரண்மனைக்கு வருகிற செல்வந்தக் குடும்பங்களால் வாங்கப்படலாம். சில விழாக்களுக்காக, பரிசுகளுக்காக, அல்லது அரச குடும்ப உறுப்பினர்களுக்கான அணிகலன்களாக மாறலாம்.”','“அப்படியானால், ஒரு முத்து ஒருவருக்குச் சொந்தமாகும் முன் பலருடன் தொடர்பு கொள்ளும்,” என்று நீ கூறுகிறாய்.','ஆண்டை தலையசைக்கிறாள். “ஒரு முத்து அரண்மனைக்காக மட்டும் பிறப்பதில்லை. அது கடலில் தொடங்குகிறது. மூழ்காளர் அதைக் கண்டுபிடிக்கிறார். ஒருவர் அதைப் பிரிக்கிறார். வணிகர்கள் அதை எடுத்துச் செல்கிறார்கள். கைவினைஞர்கள் அதைத் தங்கத்தில் பதிக்கிறார்கள். இறுதியில், ஒருவருக்கு நினைவில் நிற்கும் ஒரு நாளில் அதை அணிவார்கள்.”','நல்லூர் புன்னகைக்கிறார். “மிக நன்றாகச் சொன்னாய்.”'],choices:[
+{label:'கைவினைஞர்கள் முத்தைத் தங்கத்தில் எவ்வாறு பதிக்கிறார்கள் என்று கேள்.',learn:5,transition:`<p>முத்தின் ஒளியை மறைக்காமல் தங்கத்தின் சிறிய அமைப்பு அதை எவ்வாறு தாங்குகிறது என்று நல்லூர் உனக்குக் காட்டுகிறார். அவரது தொழிலாளர் தயாரான அணிகலன்கள் உள்ள தட்டைப் பயணத்திற்காகத் தயாரிப்பதை நீ கவனமாகப் பார்க்கிறாய்.</p><p>தங்கத்தைப் பார்த்துக்கொண்டிருக்கும் உன்னிடம் ஆண்டை கூறுகிறாள்: “நுணுக்கமான வேலை மரியாதைக்குரியது. ஆனால் தங்கம் ஒருவரை மற்றொருவரைவிட உயர்ந்தவராக்காது.”</p>${lessonBox(4)}<p>சிறிது நேரத்தில், தனது தொழிலாளருடன் அரண்மனை வளாகத்துக்குச் செல்ல உன்னையும் ஆண்டையையும் நல்லூர் அழைக்கிறார்.</p>`},
+{label:'அரண்மனைக்கு அருகில் வாழும் மக்களைப் பற்றி மேலும் கேள்.',learn:5,transition:`<p>அரண்மனை பலரின் உழைப்பால் இயங்குகிறது என்று நல்லூர் கூறுகிறார்: காவலர்கள், பணியாளர்கள், சமையல்காரர்கள், எழுத்தர்கள், இசைக்கலைஞர்கள், கைவினைஞர்கள், வணிகர்கள், வருகையாளர்கள்.</p><p>ஆண்டை தலையசைக்கிறாள். “அதைப் பார்க்கும்போது இதை நினைவில் கொள். பல சாதாரணக் கைகள் அதை இயங்கச் செய்வதால்தான் அரண்மனை இவ்வளவு பெரிதாகத் தோன்றுகிறது.”</p>${lessonBox(4)}<p>நல்லூரின் தொழிலாளர் நகைத் தட்டைக் கொண்டு செல்லத் தயாராகும்போது, அவளுடன் செல்ல உன்னையும் ஆண்டையையும் அவர் அழைக்கிறார்.</p>`},
+{label:'ஆண்டைக்கு பணத்தை எண்ணி பாதுகாப்பாகக் கட்ட உதவு.',learn:5,transition:`<p>நீயும் ஆண்டையும் பணத்தை கவனமாக எண்ணி, அந்தப் பையை அவளின் பயண ஆடைக்குள் பாதுகாப்பாகக் கட்டுகிறீர்கள். உங்கள் கவனத்தைப் பார்த்த நல்லூர் புன்னகைக்கிறார்.</p><p>“நியாயமாகக் கணக்கிடுபவர், தங்கம் அணிபவரைவிடக் குறைவானவர் அல்ல,” என்று ஆண்டை கூறுகிறாள்.</p>${lessonBox(4)}<p>நல்லூரின் தொழிலாளர் நகைத் தட்டைக் கொண்டு செல்லத் தயாராகும்போது, அவளுடன் செல்ல உன்னையும் ஆண்டையையும் அவர் அழைக்கிறார்.</p>`}
+]},
+{title:'அரண்மனை வளாகத்தின் ஒரு காட்சி',place:'மதுரை, பாண்டியர் அரண்மனைக்கு அருகில்',paragraphs:['நல்லூர் உன்னை அன்போடு, சற்றே நகைச்சுவையோடு பார்க்கிறார். “நீ தொலைவிலிருந்து வந்திருக்கிறாய்; நல்ல கேள்விகளும் கேட்கிறாய். இன்று பிற்பகல் என் தொழிலாளர் தயாரான அணிகலன்கள் உள்ள தட்டைப் அரண்மனை வளாகத்துக்கு எடுத்துச் செல்கிறாள். அவளுடன் நீயும் ஆண்டையும் செல்லலாம்—ஆனால் அருகிலேயே இருங்கள்; வழியை மறைக்காதீர்கள்.”','நீங்கள் தொழிலாளரைப் பின்தொடர்ந்து காவல் இருக்கும் நுழைவாயிலை நோக்கிச் செல்கிறீர்கள். தனிப்பட்ட அறைகளுக்குள் நீங்கள் செல்லவில்லை. ஆனால் நிழலான வெளிமுற்றத்தில், கூடைகள், துணிகள், விளக்குகள், எழுதிய கணக்குகள் ஆகியவற்றை எடுத்துச் செல்லும் பணியாளர்களைப் பார்க்கிறாய். வணிகர்கள் காத்திருக்கிறார்கள். மனுக்கள் கொண்டவர்கள் அதிகாரிகளிடம் பேசுகிறார்கள். அதற்கு அப்பால் உள்ள மண்டபம் வழியாக இசைக்கலைஞர்கள் செல்கிறார்கள்.','நகைத் தட்டு ஒரு அரண்மனை அதிகாரியால் சரிபார்க்கப்படுகிறது. ஒரு முத்து அணிகலன் ஒளியைப் பிடித்துப் பிரகாசித்து, பின்னர் வளாகத்துக்குள் மறைவதை நீ பார்க்கிறாய்.','வாயிலில் காவலர்களைக் காண்கிறாய். அதே நேரத்தில் நகைத் தட்டைக் கொண்டுசெல்லும் தொழிலாளர், அதைச் சரிபார்க்கும் பணியாளர், கணக்கெழுதும் எழுத்தர், நிழலில் காத்திருக்கும் மக்கள் ஆகியோரையும் பார்க்கிறாய்.','ஆண்டை மெதுவாகச் சொல்கிறாள்: “இப்போது கடைசி வரிகளின் பொருள் உனக்குப் புரிகிறது. பெரியவர்களை மட்டும் பார்த்து நிற்காதே. இந்த இடத்தை இயங்கச் செய்கிற அனைவரையும் பார்.”'],choices:[
+{label:'காவலர்களையும் அதிகாரிகளையும் கவனிப்பதைப் போலவே உழைப்பாளிகளையும் கவனி.',transition:'நீ சுமக்கும் கைகள், கணக்கெழுதும் கைகள், சரிபார்க்கும் கைகள், பெருக்கும் கைகள், சமைக்கும் கைகள், வருகையாளர்களை வழிநடத்தும் கைகள்—அனைத்தையும் கவனிக்கிறாய். அரண்மனை வளாகம் தொலைதூர வியப்பாக அல்லாமல், பலரால் உருவாக்கப்பட்ட இடமாகத் தோன்றுகிறது.'},
+{label:'நகை செய்வதில் அவளுக்குப் பிடித்தது என்ன என்று தொழிலாளரிடம் கேள்.',transition:'தங்கத்தை வடிவமைப்பதும், முத்தைப் பதிப்பதும், தன்னை அறியாத ஒருவருக்குக் கூட ஒரு சிறிய பொருள் மகிழ்ச்சி தரும் என்பதை நினைப்பதும் தனக்குப் பிடிக்கும் என்று அந்தத் தொழிலாளர் கூறுகிறாள்.'},
+{label:'அமைதியாக நின்று அந்த இடத்தின் வியப்பை மனதில் ஏற்றுக்கொள்.',transition:'நிழலில் அமைதியாக நிற்கிறாய். கொற்கைக் கடல், ஆறு, பனைத் தோப்பு, நல்லூரின் கடை ஆகியவை உன் நினைவில் வருகின்றன. ஒரு கணம், அவையனைத்தும் ஒன்றோடொன்று இணைந்ததாகத் தோன்றுகின்றன.'}
+]}
+];
+const $=id=>document.getElementById(id);
+function learnedLines(){return poemLessons.slice(0,Math.min(state.learned,poemLessons.length)).map(x=>x.tamil).join('\n')}
+function renderRoute(){$('route').innerHTML=route.map((n,i)=>`<div class="stop ${i<state.scene?'done':i===state.scene?'current':''}"><span class="dot"></span><span>${n}</span></div>`).join('')}
+function renderPoem(){const n=Math.min(state.learned,poemLessons.length);$('poemProgress').textContent=n?`கற்ற பகுதிகள்: ${n} / ${poemLessons.length}`:'பாடல் வரிகள் பயணத்தில் கற்கப்படும்.';$('poemLines').textContent=n?learnedLines():'யாதும் ஊரே; யாவரும் கேளிர்;'}
+function renderScene(){const s=scenes[state.scene];$('sceneMeta').innerHTML=`காட்சி ${String(state.scene+1).padStart(2,'0')} <span>• ${route[state.scene]}</span>`;$('scene-title').textContent=s.title;$('scenePlace').textContent=s.place;$('storyBody').innerHTML=s.paragraphs.map(p=>`<p>${p}</p>`).join('');$('choices').innerHTML=s.choices.map((c,i)=>`<button class="choice" type="button" data-choice="${i}"><span class="label">${c.label}</span></button>`).join('');$('endingActions').hidden=true;renderRoute();renderPoem();document.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',choose))}
+function choose(ev){const s=scenes[state.scene],c=s.choices[Number(ev.currentTarget.dataset.choice)];if(c.learn)state.learned=Math.max(state.learned,c.learn);if(state.scene===scenes.length-1)finish(c.transition);else showTransition(c.transition,scenes[state.scene+1])}
+function showTransition(text,next){$('sceneMeta').innerHTML=`பயணம் தொடர்கிறது <span>• ${route[state.scene]} முதல் ${route[state.scene+1]} வரை</span>`;$('scene-title').textContent='பயணம் தொடர்கிறது';$('scenePlace').textContent='ஒரு இடத்திலிருந்து அடுத்த இடத்துக்குச் செல்லும் நேரம்';$('storyBody').innerHTML=`<section class="transition"><p class="step">பாதை நீள்கிறது</p><div class="transition-text">${text}</div><p class="next-place"><small>அடுத்த இடம்</small>${next.place}</p><button class="continue" id="continueJourney" type="button">அடுத்த காட்சிக்குச் செல்</button></section>`;$('choices').innerHTML='';$('endingActions').hidden=true;renderRoute();renderPoem();$('continueJourney').addEventListener('click',()=>{state.scene+=1;renderScene();window.scrollTo({top:0,behavior:'smooth'})})}
+function finish(finalMoment){state.learned=poemLessons.length;$('sceneMeta').innerHTML='பயணம் முடிந்தது <span>• கொற்கைக்குத் திரும்புதல்</span>';$('scene-title').textContent='மதுரை நினைவில் நிற்கிறது';$('scenePlace').textContent='முதல் பயணம்; நீண்ட புரிதல்';$('storyBody').innerHTML=`<p>${finalMoment}</p><p>சிறிது நேரம் கழித்து, நீயும் ஆண்டையும் கொற்கைக்குத் திரும்பும் பாதையில் செல்கிறீர்கள். முத்து விற்பனை முடிந்துவிட்டது; பணமும் பாதுகாப்பாக உள்ளது.</p><p>மதுரை பின்னால் சிறிதாகிறது. ஆனால் அதன் ஒலிகள் உன் நினைவில் தங்குகின்றன: சந்தையின் கூவல்கள், நகைக்கடையின் கருவிகள், அரண்மனை வளாகத்தில் நகரும் மக்கள், பாடலின் அமைதியான வார்த்தைகள்.</p><p>கடல், பாதை, பணிமனை, சந்தை, அரண்மனை—இவை அனைத்தும் ஒன்றோடொன்று இணைந்தவை என்பதை நீ கண்டுகொண்டாய். ஒரு முத்து பல கைகளைத் தாண்டிச் செல்கிறது. ஒரு கதையும் அப்படியே.</p><section class="lesson"><p class="lesson-label">நீ கற்ற முழுப் பாடல்</p><p class="tamil">${poemLessons.map(x=>x.tamil).join('\n').replace(/\n/g,'<br>')}</p><p class="meaning">புறநானூறு 192; மரபின்படி பாடியவர் கணியன் பூங்குன்றனார். இக்கதையில் தரப்பட்டுள்ள எளிய விளக்கங்கள் இளம் வாசகர்களுக்கானவை; அவை முழுமையான ஆய்வுமுறை மொழிபெயர்ப்பு அல்ல.</p></section>`;$('choices').innerHTML='';const a=$('endingActions');a.hidden=false;a.innerHTML='<button class="action" id="playAgain" type="button">பயணத்தை மீண்டும் தொடங்கு</button><button class="action secondary" id="copyEnding" type="button">முடிவை நகலெடு</button><a class="home-link" href="https://tlab.projectxp.workers.dev/">TLab முகப்புக்குத் திரும்பு</a>';renderRoute();renderPoem();$('playAgain').addEventListener('click',restart);$('copyEnding').addEventListener('click',()=>{const t=$('storyBody').innerText;navigator.clipboard?.writeText(t).then(()=>{$('copyEnding').textContent='நகலெடுக்கப்பட்டது'}).catch(()=>{$('copyEnding').textContent='உரையைத் தேர்ந்தெடுத்து நகலெடுக்கவும்'})})}
+function restart(){state=initialState();renderScene();window.scrollTo({top:0,behavior:'smooth'})}$('restartTop').addEventListener('click',restart);renderScene();
 })();
-
-
-</script></body>
+</script>
+</body>
 </html>
