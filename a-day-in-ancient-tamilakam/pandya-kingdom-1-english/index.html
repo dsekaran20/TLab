@@ -1,448 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The Pearl and the Poem — A Pandya Courier's Journey</title>
-    <meta
-      name="description"
-      content="A short interactive prototype set in Sangam-era Tamilakam. Carry a pearl pouch and a verse from the coast to the Pandya court."
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <!-- Decorative palm-leaf grain background, pure CSS -->
-    <div class="palm-grain" aria-hidden="true"></div>
-    <div class="vignette" aria-hidden="true"></div>
-
-    <main class="stage" role="main">
-      <header class="topbar">
-        <div class="brand">
-          <svg
-            class="brand-mark"
-            viewBox="0 0 40 40"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-label="The Pearl and the Poem"
-          >
-            <!-- Stylized pearl + fish (Pandya emblem nod) without overt religious iconography -->
-            <circle cx="20" cy="14" r="5" fill="none" stroke="currentColor" stroke-width="1.4" />
-            <path
-              d="M6 26 Q20 16 34 26 Q20 36 6 26 Z"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.4"
-              stroke-linejoin="round"
-            />
-            <circle cx="26" cy="26" r="0.9" fill="currentColor" />
-          </svg>
-          <div class="brand-text">
-            <div class="brand-title">The Pearl and the Poem</div>
-            <div class="brand-sub">A courier's road from Korkai to Madurai</div>
-          </div>
-        </div>
-        <button
-          class="ghost-btn"
-          id="resetBtn"
-          data-testid="button-reset"
-          aria-label="Restart the journey"
-        >
-          Restart journey
-        </button>
-      </header>
-
-      <section class="layout">
-        <!-- Main narrative panel -->
-        <article class="scene-card" aria-live="polite">
-          <div class="scene-meta">
-            <span class="scene-no" id="sceneNo" data-testid="text-scene-number">Scene 01</span>
-            <span class="scene-dot" aria-hidden="true"></span>
-            <span class="scene-place" id="scenePlace" data-testid="text-scene-place">Korkai, the pearl shore</span>
-          </div>
-          <h1 class="scene-title" id="sceneTitle" data-testid="text-scene-title">
-            The tide brings a charge
-          </h1>
-          <p class="scene-text" id="sceneText" data-testid="text-scene-narrative">
-            Loading the manuscript…
-          </p>
-
-          <div class="choices" id="choices" data-testid="container-choices"></div>
-
-          <!-- Route progress -->
-          <div class="route" aria-label="Journey progress" data-testid="container-route">
-            <ol class="route-markers" id="routeMarkers"></ol>
-            <div class="route-line" aria-hidden="true"></div>
-          </div>
-        </article>
-
-        <!-- Status / inventory rail -->
-        <aside class="rail" aria-label="Courier's ledger">
-          <div class="rail-section">
-            <div class="rail-heading">The Courier</div>
-            <div class="rail-name" data-testid="text-courier-name">Ilavan, of the shore village</div>
-            <div class="rail-sub">Pandya country, early Sangam age</div>
-          </div>
-
-          <div class="rail-section">
-            <div class="rail-heading">Ledger</div>
-            <ul class="meters" id="meters" data-testid="container-meters">
-              <!-- meters populated by JS -->
-            </ul>
-          </div>
-
-          <div class="rail-section">
-            <div class="rail-heading">Pouch</div>
-            <ul class="inventory" id="inventory" data-testid="container-inventory">
-              <!-- inventory populated by JS -->
-            </ul>
-          </div>
-
-          <div class="rail-section disclaimer" data-testid="text-disclaimer">
-            Historical fiction prototype inspired by Sangam-era Tamilakam. Names, places, and customs are dramatized; not a scholarly reconstruction.
-          </div>
-        </aside>
-      </section>
-
-      <footer class="footer">
-        <span class="footer-mark">~</span>
-        <span>A short interactive sketch · six scenes · your choices shape the ending</span>
-        <span class="footer-mark">~</span>
-      </footer>
-    </main>
-
-    <script src="game.js"></script>
-  <script data-pplx-inline-edit>
-(function () {
-  if (window === window.top) return;
-
-  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
-  const MAX_FONT_BYTES = 500 * 1024;
-  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
-  let scrollForwarding = false;
-  let scrollRaf = 0;
-  let trustedTopOrigin = null;
-
-  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
-  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
-  // across multiple labels.
-  function matchesAllowedOrigin(origin) {
-    if (!origin) return false;
-    for (const entry of allowedParentOrigins) {
-      if (!entry.includes("*")) {
-        if (entry === origin) return true;
-        continue;
-      }
-      const pattern = new RegExp(
-        "^" +
-          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
-          "$",
-      );
-      if (pattern.test(origin)) return true;
-    }
-    return false;
-  }
-
-  // Trust decision: when the sender is same-origin-visible (event.origin is a
-  // real origin like https://www.perplexity.ai) we trust event.origin directly.
-  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
-  // broker's stamped `parentOrigin` to identify the top window. The fallback
-  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
-  // on the response path (see postToTrustedTop) to ensure replies can't be
-  // delivered to anyone but the actual top window of that claimed origin.
-  function getTrustedParentOrigin(event) {
-    const forwardedParentOrigin =
-      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
-    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
-    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
-  }
-
-  // All responses go to window.top with targetOrigin = the allowlisted origin.
-  // An attacker that iframes us inside their own null-origin broker can claim
-  // any parentOrigin they like, but the browser will drop the reply whenever
-  // the real top's origin doesn't match — so the screenshot never leaves.
-  function postToTrustedTop(message) {
-    if (!trustedTopOrigin) return;
-    try {
-      window.top.postMessage(message, trustedTopOrigin);
-    } catch (_error) {}
-  }
-
-  function inlineAll(original, clone) {
-    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
-
-    try {
-      const computedStyle = getComputedStyle(original);
-      // cssText on a computed style is the serialized declaration in modern
-      // Chromium/Safari — a single read beats enumerating ~400 longhand
-      // properties. Firefox returns "" here, so we fall back on empty.
-      const serialized = computedStyle.cssText;
-      if (serialized) {
-        clone.style.cssText = serialized;
-      } else {
-        const parts = new Array(computedStyle.length);
-        for (let index = 0; index < computedStyle.length; index += 1) {
-          const property = computedStyle[index];
-          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
-        }
-        clone.style.cssText = parts.join("");
-      }
-    } catch (_error) {}
-
-    const originalChildren = original.children;
-    const clonedChildren = clone.children;
-    for (
-      let index = 0;
-      index < originalChildren.length && index < clonedChildren.length;
-      index += 1
-    ) {
-      inlineAll(originalChildren[index], clonedChildren[index]);
-    }
-  }
-
-  function extractFontUrl(srcValue) {
-    const matches = [
-      ...srcValue.matchAll(
-        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
-      ),
-    ];
-    if (matches.length === 0) return null;
-    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
-    if (woff2) return woff2[1];
-    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
-    if (woff) return woff[1];
-    return matches[0][1];
-  }
-
-  // Cache resolved font URL -> data URI across captures. Fonts on a page
-  // essentially never change, and a batch run emits multiple captures back to
-  // back — without this we'd refetch + re-base64 every time.
-  const fontDataUriCache = new Map();
-  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
-
-  async function fetchAsDataUri(url) {
-    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
-    let dataUri = null;
-    try {
-      const response = await fetch(url, { mode: "cors", credentials: "omit" });
-      if (response.ok) {
-        const blob = await response.blob();
-        if (blob.size <= MAX_FONT_BYTES) {
-          dataUri = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () =>
-              resolve(typeof reader.result === "string" ? reader.result : null);
-            reader.onerror = () => resolve(null);
-            reader.readAsDataURL(blob);
-          });
-        }
-      }
-    } catch (_error) {
-      dataUri = null;
-    }
-    fontDataUriCache.set(url, dataUri);
-    return dataUri;
-  }
-
-  function collectFontFaceRuleTexts() {
-    const rules = [];
-    for (const sheet of document.styleSheets) {
-      let cssRules;
-      try {
-        cssRules = sheet.cssRules;
-      } catch (_error) {
-        continue;
-      }
-      if (!cssRules) continue;
-      for (const rule of cssRules) {
-        const cssText = rule.cssText || "";
-        if (cssText.startsWith("@font-face")) rules.push(cssText);
-      }
-    }
-    return rules;
-  }
-
-  async function buildInlinedFontCss() {
-    const ruleTexts = collectFontFaceRuleTexts();
-    if (ruleTexts.length === 0) return null;
-
-    const resolved = ruleTexts.map((cssText) => {
-      if (!SRC_DECLARATION_RE.test(cssText)) return null;
-      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
-      if (!srcMatch) return null;
-      const url = extractFontUrl(srcMatch[1]);
-      if (!url) return null;
-      try {
-        return { cssText, url: new URL(url, document.baseURI).href };
-      } catch (_error) {
-        return null;
-      }
-    });
-
-    const dataUris = await Promise.all(
-      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
-    );
-
-    const inlined = [];
-    let totalBytes = 0;
-    for (let index = 0; index < resolved.length; index += 1) {
-      const entry = resolved[index];
-      const dataUri = dataUris[index];
-      if (!entry || !dataUri) continue;
-      const approxBytes = dataUri.length * 0.75;
-      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
-      totalBytes += approxBytes;
-      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
-    }
-    return inlined.length > 0 ? inlined.join("\n") : null;
-  }
-
-  function stripExternal(clone) {
-    const images = clone.querySelectorAll("img");
-    for (let index = 0; index < images.length; index += 1) {
-      const src = images[index].getAttribute("src");
-      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
-    }
-
-    const elements = clone.querySelectorAll("*");
-    for (let index = 0; index < elements.length; index += 1) {
-      const style = elements[index].style.cssText;
-      if (style && style.includes("url(")) {
-        elements[index].style.cssText = style.replace(
-          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
-          "none",
-        );
-      }
-    }
-  }
-
-  function emitScroll() {
-    scrollRaf = 0;
-    if (!scrollForwarding) return;
-    postToTrustedTop({
-      type: "INLINE_EDIT_SCROLL",
-      scrollX: window.scrollX,
-      scrollY: window.scrollY,
-    });
-  }
-
-  window.addEventListener(
-    "scroll",
-    function () {
-      if (!scrollForwarding || scrollRaf) return;
-      scrollRaf = requestAnimationFrame(emitScroll);
-    },
-    { passive: true, capture: true },
-  );
-
-  async function handleCaptureRequest(event) {
-    const requestId = event.data.requestId;
-    const scrollX = window.scrollX;
-    const scrollY = window.scrollY;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    function postResult(dataUrl) {
-      postToTrustedTop({
-        type: "INLINE_EDIT_SCREENSHOT_RESULT",
-        requestId,
-        dataUrl,
-        scrollX,
-        scrollY,
-      });
-    }
-
-    try {
-      // Wait for any pending web fonts to resolve so both inline metrics and
-      // the @font-face inlining below see the same loaded faces.
-      if (document.fonts && document.fonts.ready) {
-        try {
-          await document.fonts.ready;
-        } catch (_error) {}
-      }
-
-      const clone = document.documentElement.cloneNode(true);
-      inlineAll(document.documentElement, clone);
-
-      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
-      for (let index = 0; index < removedNodes.length; index += 1) {
-        removedNodes[index].remove();
-      }
-
-      stripExternal(clone);
-
-      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
-      // can resolve them — external font URLs aren't fetched during
-      // foreignObject rendering, which would otherwise force a fallback face
-      // and change text metrics.
-      const inlinedFontCss = await buildInlinedFontCss();
-      if (inlinedFontCss) {
-        const styleEl = document.createElement("style");
-        styleEl.textContent = inlinedFontCss;
-        const head = clone.querySelector("head");
-        if (head) head.appendChild(styleEl);
-        else clone.insertBefore(styleEl, clone.firstChild);
-      }
-
-      const html = new XMLSerializer().serializeToString(clone);
-      const svg =
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
-        '<foreignObject width="100%" height="100%">' +
-        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
-        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
-        html +
-        "</div></div></foreignObject></svg>";
-      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-      const image = new Image();
-      image.onload = function () {
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        canvas.getContext("2d").drawImage(image, 0, 0);
-        postResult(canvas.toDataURL("image/png"));
-      };
-      image.onerror = function () {
-        postResult(null);
-      };
-      image.src = svgUrl;
-    } catch (_error) {
-      postResult(null);
-    }
-  }
-
-  window.addEventListener("message", function (event) {
-    if (!event.data) return;
-    // Only accept messages from the direct parent frame. Blocks sibling /
-    // unrelated-window postMessage senders that could otherwise reach us.
-    if (event.source !== window.parent) return;
-
-    const trustedParentOrigin = getTrustedParentOrigin(event);
-    if (!trustedParentOrigin) return;
-    trustedTopOrigin = trustedParentOrigin;
-
-    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
-      scrollForwarding = true;
-      emitScroll();
-      return;
-    }
-
-    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
-      scrollForwarding = false;
-      if (scrollRaf) cancelAnimationFrame(scrollRaf);
-      scrollRaf = 0;
-      return;
-    }
-
-    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
-
-    handleCaptureRequest(event);
-  });
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Pearls and the Road</title>
+  <style>
+    :root{--navy:#202a4a;--ink:#40392f;--muted:#796d5d;--paper:#fbf5e7;--paper2:#f2e5c8;--gold:#bf953b;--line:#d6c4a0;--shadow:rgba(71,51,25,.17)}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);background-color:#e8d8b4;background-image:linear-gradient(rgba(100,79,42,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(100,79,42,.055) 1px,transparent 1px);background-size:6px 6px;font-family:Georgia,"Times New Roman",serif}button{font:inherit}
+    .site-header{width:min(1130px,calc(100% - 32px));margin:0 auto;padding:26px 4px 20px;display:flex;justify-content:space-between;align-items:center;gap:20px}.brand{display:flex;align-items:center;gap:13px}.brand-mark{width:38px;height:38px;border:1px solid var(--navy);border-radius:50%;display:grid;place-items:center;color:var(--navy);font-size:19px}.brand h1{margin:0;color:var(--navy);font-size:1.55rem;font-weight:600;line-height:1}.brand p{margin:5px 0 0;color:var(--muted);font:.68rem/1.25 Arial,sans-serif;letter-spacing:.19em;text-transform:uppercase}.header-actions{display:flex;align-items:center;gap:10px}.home-link,.restart{border:1px solid var(--navy);color:var(--navy);background:transparent;border-radius:999px;padding:10px 17px;font:.73rem Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;text-decoration:none;white-space:nowrap}.home-link:hover,.home-link:focus,.restart:hover,.restart:focus{background:var(--navy);color:#fff}
+    .layout{width:min(1130px,calc(100% - 32px));margin:8px auto 30px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:25px;align-items:start}.story-card,.side-card{border:1px solid var(--line);background:rgba(251,245,231,.95);box-shadow:0 10px 25px var(--shadow)}.story-card{border-radius:13px;overflow:hidden}.story-top{padding:33px 37px 18px;border-bottom:1px solid #e5d8bf}.eyebrow{margin:0 0 13px;color:#987733;font:700 .69rem Arial,sans-serif;letter-spacing:.22em;text-transform:uppercase}.eyebrow span{color:#83745f;font-weight:400}#scene-title{margin:0;color:var(--navy);font-size:clamp(2rem,4vw,3rem);line-height:1.06;font-weight:600}.scene-place{margin:10px 0 0;color:var(--muted);font:.83rem Arial,sans-serif;letter-spacing:.07em}
+    .story-body{padding:30px 37px 14px}.story-body p{margin:0 0 18px;font-size:1.09rem;line-height:1.68}.lesson{margin:25px 0;padding:20px 22px;background:rgba(236,222,190,.48);border-left:3px solid var(--gold)}.lesson .tamil{margin:0 0 10px;color:var(--navy);font-size:1.13rem;line-height:1.75}.lesson .meaning{margin:0;color:#64584b;font:italic 1rem/1.55 Georgia,serif}.lesson .lesson-label{margin:0 0 9px;color:#987733;font:700 .66rem Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase}
+    .choices{padding:3px 37px 24px;display:grid;gap:11px}.choice{width:100%;text-align:left;cursor:pointer;padding:16px 18px;border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.3);color:var(--ink);transition:border-color .15s,transform .15s,background .15s}.choice:hover,.choice:focus{border-color:var(--navy);background:#fffaf0;transform:translateY(-1px)}.choice .label{display:block;font-size:1.02rem;line-height:1.35}.choice .label::before{content:"◆";color:var(--gold);font-size:.7rem;padding-right:13px;vertical-align:2px}
+    .transition{padding:42px 28px;text-align:center;background:linear-gradient(180deg,rgba(224,204,163,.55),rgba(251,245,231,.95));border-top:1px solid #e1d3b7;border-bottom:1px solid #e1d3b7}.transition .step{margin:0 0 10px;color:#987733;font:700 .65rem Arial,sans-serif;letter-spacing:.23em;text-transform:uppercase}.transition .transition-text{max-width:570px;margin:18px auto 20px;color:#625747;font-size:1.03rem;line-height:1.65;text-align:left}.transition .transition-text p{margin:0 0 16px}.transition .next-place{margin:24px auto 18px;color:var(--navy);font:italic 1.02rem/1.4 Georgia,serif}.transition .next-place small{display:block;margin-bottom:4px;color:#987733;font:700 .64rem Arial,sans-serif;letter-spacing:.17em;text-transform:uppercase}.continue{border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:999px;padding:12px 19px;cursor:pointer;font:.73rem Arial,sans-serif;letter-spacing:.13em;text-transform:uppercase}.continue:hover,.continue:focus{opacity:.86}
+    .progress{margin:0 37px;padding:22px 5px 26px;border-top:1px solid #e7dcc7}.route{display:flex;align-items:flex-start;justify-content:space-between;position:relative;gap:2px}.route::before{content:"";position:absolute;top:7px;left:3%;right:3%;border-top:1px dashed #bcae90}.stop{position:relative;z-index:1;width:16.3%;text-align:center;color:#8a7d68;font:.58rem Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase}.dot{display:block;width:14px;height:14px;margin:0 auto 9px;border:1px solid #aa9875;border-radius:50%;background:var(--paper2)}.stop.done .dot{background:var(--gold);border-color:var(--gold)}.stop.current .dot{background:var(--navy);border-color:var(--navy);box-shadow:0 0 0 3px rgba(32,42,74,.13)}.stop.current{color:var(--navy);font-weight:700}
+    .sidebar{display:grid;gap:18px}.side-card{padding:18px;border-radius:12px;box-shadow:0 8px 20px rgba(71,51,25,.11)}.side-label{margin:0 0 10px;color:#987733;font:700 .65rem Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase}.side-main{margin:0;color:var(--navy);font-size:1.08rem;line-height:1.35}.side-muted{margin:5px 0 0;color:var(--muted);font:.79rem Arial,sans-serif;letter-spacing:.03em}.poem-card{background:rgba(250,243,226,.91)}.poem-progress{margin:0 0 9px;color:var(--muted);font:.75rem Arial,sans-serif}.poem-lines{margin:0;color:var(--navy);font-size:.96rem;line-height:1.65}.tiny-note{color:#766b5b;font:.73rem/1.5 Arial,sans-serif;border:1px dashed #c9b58a;background:rgba(248,239,219,.48)}.ending-actions{display:flex;flex-wrap:wrap;gap:10px;padding:3px 37px 28px}.action{border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:999px;padding:11px 17px;cursor:pointer;font:.73rem Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}.action.secondary{background:transparent;color:var(--navy)}.action:hover,.action:focus{opacity:.85}footer{padding:2px 18px 26px;text-align:center;color:#786b56;font:.7rem Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase}
+    @media(max-width:830px){.layout{grid-template-columns:1fr}.sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar .poem-card,.sidebar .tiny-note{grid-column:1/-1}}@media(max-width:580px){.site-header,.layout{width:min(100% - 24px,1130px)}.site-header{align-items:flex-start;padding-top:18px}.brand-mark{display:none}.brand h1{font-size:1.3rem}.header-actions{gap:7px;flex-direction:column;align-items:flex-end}.home-link,.restart{padding:8px 10px;font-size:.58rem}.story-top{padding:25px 21px 17px}.story-body{padding:25px 21px 11px}.choices{padding:3px 21px 18px}.progress{margin:0 21px;padding-bottom:21px}.story-body p{font-size:1.03rem}.sidebar{grid-template-columns:1fr}.sidebar .poem-card,.sidebar .tiny-note{grid-column:auto}.stop{font-size:.48rem;letter-spacing:.06em}.ending-actions{padding:3px 21px 24px}.transition{padding:36px 21px}}
+  </style>
+</head>
+<body>
+<header class="site-header"><div class="brand"><div class="brand-mark">◌</div><div><h1>The Pearls and the Road</h1><p>A young trader’s journey from Korkai to Madurai · c. 30 BCE</p></div></div><div class="header-actions"><a class="home-link" href="https://tlab.projectxp.workers.dev/" aria-label="Return to the Tamil Lab home page">TLab home</a><button class="restart" id="restartTop" type="button">Restart journey</button></div></header>
+<main class="layout"><section class="story-card" aria-live="polite"><div class="story-top"><p class="eyebrow" id="sceneMeta"></p><h2 id="scene-title"></h2><p class="scene-place" id="scenePlace"></p></div><div class="story-body" id="storyBody"></div><div class="choices" id="choices"></div><div class="ending-actions" id="endingActions" hidden></div><div class="progress"><div class="route" id="route" aria-label="Journey progress"></div></div></section>
+<aside class="sidebar"><section class="side-card"><p class="side-label">The travellers</p><p class="side-main">Ilavan and Andai</p><p class="side-muted">From Korkai, the pearl coast</p></section><section class="side-card"><p class="side-label">Time and place</p><p class="side-main">Pandyan country, c. 30 BCE</p><p class="side-muted">About 2,000 years ago</p></section><section class="side-card poem-card"><p class="side-label">Puranānūru 192</p><p class="poem-progress" id="poemProgress"></p><p class="poem-lines" id="poemLines">The poem will be learned on the road.</p></section><section class="side-card tiny-note">This is historical fiction set roughly around <strong>30 BCE</strong>, in the Pandyan world of ancient Tamilakam—about 2,000 years ago. Dating Sangam texts is uncertain and debated. <em>Puranānūru</em> is generally placed broadly in the early historic/Sangam period, often roughly between the last centuries BCE and the early centuries CE; this story uses the poem as a literary thread rather than claiming it was certainly composed in exactly 30 BCE. The Tamil poem is <em>Puranānūru</em> 192, attributed to Kaṇiyaṉ Pūṅkuṉṟaṉār.</section></aside></main>
+<footer>~ A short interactive story ~</footer>
+<script>
+(()=>{'use strict';
+const initialState=()=>({scene:0,learned:0});let state=initialState();
+const route=['Korkai','Inland road','River crossing','Palm grove','Madurai market','Royal compound'];
+const poemLessons=[
+{tamil:'யாதும் ஊரே; யாவரும் கேளிர்;',meaning:'Every place can be our home. Every person can be our kin.'},
+{tamil:'தீதும் நன்றும் பிறர்தர வாரா;\nநோதலும் தணிதலும் அவற்றோ ரன்ன;',meaning:'Good and bad do not come only from other people. Pain and relief are part of life too.'},
+{tamil:'சாதலும் புதுவது அன்றே; வாழ்தல்\nஇனிதுஎன மகிழ்ந்தன்றும் இலமே; முனிவின்,\nஇன்னா தென்றலும் இலமே;',meaning:'Death is not new. Do not become too proud in happy times, and do not lose heart in hard times.'},
+{tamil:'மின்னொடு வானம் தண்துளி தலைஇ, ஆனாது\nகல்பொருது இரங்கும் மல்லற் பேர்யாற்று\nநீர்வழிப் படூஉம் புணைபோல, ஆருயிர்',meaning:'After rain and lightning, a strong river carries a small raft over rocks. Life also carries us onward.'},
+{tamil:'முறைவழிப் படூஉம் என்பது திறவோர்\nகாட்சியின் தெளிந்தனம் ஆகலின், மாட்சியின்\nபெரியோரை வியத்தலும் இலமே;\nசிறியோரை இகழ்தல் அதனினும் இலமே.',meaning:'Wise people understand that life follows its course. Do not be dazzled by the powerful, and do not look down on ordinary people.'}
+];
+const lessonBox=i=>{const l=poemLessons[i];return `<section class="lesson"><p class="lesson-label">Andai teaches you</p><p class="tamil">${l.tamil.replace(/\n/g,'<br>')}</p><p class="meaning">${l.meaning}</p></section>`};
+const scenes=[
+{title:'The pearls leave Korkai',place:'Korkai, the pearl shore · c. 30 BCE',paragraphs:['At dawn, the divers return from the pearl banks. Their boats slide through the pale water while gulls turn above them.','Andai, your mentor, sorts the best pearls on a dark cloth. Some are too small. Some are uneven. A few are round and bright enough for fine jewellery.','She places the chosen pearls in a sealed pouch. “These go to Nallur, a jeweller in Madurai,” she says. “He will examine them, buy the ones he accepts, and make ornaments for his customers.”','“Who will wear them?” you ask.','“You may find out,” Andai says. “Today you travel with me.”'],choices:[
+{label:'Help Andai sort the pearls before you leave.',learn:1,transition:`<p>You and Andai finish sorting the morning’s catch. Together, you place the brightest and roundest pearls into the sealed pouch.</p><p>Andai checks the knot, then looks once more toward the sea.</p><p>“Before we go,” she says, “remember this.”</p>${lessonBox(0)}<p>You repeat the words after her. Then Andai lifts her travel bundle and begins walking inland. Soon the sound of the sea fades behind you.</p>`},
+{label:'Ask Andai to teach you the first line of an old poem.',learn:1,transition:`<p>Before you leave, Andai repeats the first line until you can say it with her:</p>${lessonBox(0)}<p>“A traveller needs that thought,” she says.</p><p>The words stay in your mind as you follow her away from the shore. Soon the sound of the sea fades behind you.</p>`},
+{label:'Set out early while the air is still cool.',learn:1,transition:`<p>You leave Korkai before the sun grows strong. The pearl pouch is safe with Andai, and the road is quiet beneath your feet.</p><p>After a time, Andai speaks as you walk.</p>${lessonBox(0)}<p>“You are leaving your own village for the first time,” she says. “Remember these words when you meet people on the road.”</p><p>As the morning passes, the sea falls farther behind you.</p>`}
+]},
+{title:'The inland road',place:'The dry track beyond the pearl coast',paragraphs:['The sea fades behind you. The road runs through scrub, dry fields, and small settlements. Heat rises from the ground.','A merchant cart catches up with you. Its driver carries salt, cloth, and jars of oil toward Madurai. He asks where you are going.','Andai answers plainly: “To sell pearls fairly, and to return with what the divers have earned.”','The driver nods. “A good road is made by people who keep their word.”'],choices:[
+{label:'Walk beside the cart and listen to the merchant’s trade stories.',learn:2,transition:`<p>You walk beside the cart while the merchant speaks of markets, fair weights, broken promises, and long roads.</p><p>When the cart turns away, Andai looks at you.</p><p>“Some people will help you. Some will not. But do not think every good thing comes from another person, or every hardship is someone else’s doing.”</p>${lessonBox(1)}<p>You repeat the lines as the road dips toward the sound of running water.</p>`},
+{label:'Accept a place in the shade of the cart.',learn:2,transition:`<p>The cart’s shade gives you a welcome rest from the heat. You listen to the wheels creak and watch the dry country pass slowly by.</p><p>When you climb down near the river crossing, Andai says, “A little shade can feel like great fortune when the day is hot. But it does not last forever.”</p>${lessonBox(1)}<p>Ahead, the river moves quickly over hidden stones.</p>`},
+{label:'Walk quickly ahead to prove you can keep pace.',learn:2,transition:`<p>You hurry ahead, determined to show Andai that you are ready for the road. But the heat soon makes your shoulders heavy.</p><p>When Andai catches up, she offers you water but does not scold you.</p><p>“A hard road is not always another person’s fault,” she says. “And help may come when you least expect it.”</p>${lessonBox(1)}<p>Together, you continue toward the river.</p>`}
+]},
+{title:'Water over the stones',place:'A river crossing on the inland road',paragraphs:['By afternoon, you reach a river crossing. Recent rain has made the current fast and brown. Stones disappear beneath the water and show again as the river moves.','A ferryman is taking travellers across in a flat wooden boat. The crossing costs a little, but the upper ford is free and rough.','Andai watches a small raft catch on a stone, turn, and move on again. “Watch the river,” she says. “It has something to teach us.”'],choices:[
+{label:'Pay for the ferryman and keep the pearl pouch dry.',learn:3,transition:`<p>The ferryman carries you safely across. Andai keeps the pearl pouch close while the boat moves over brown water.</p><p>When you reach the far bank, you breathe with relief.</p><p>“It is good to be safe,” Andai says. “But do not think one easy crossing means every road will be easy.”</p>${lessonBox(2)}<p>The road leads on beneath a darkening sky.</p>`},
+{label:'Wait until the current eases and cross carefully at the ford.',learn:3,transition:`<p>You wait with Andai until the river slows enough to show its stones. Step by careful step, you cross with the water pressing around your legs.</p><p>On the far bank, Andai smiles.</p><p>“You did not rush when the river was strong. Remember that feeling. A hard moment can pass, just as an easy moment can.”</p>${lessonBox(2)}<p>Evening begins as you leave the river behind.</p>`},
+{label:'Try the upper ford at once.',learn:3,transition:`<p>You step into the upper ford before the river has settled. The stones shift beneath your feet, and cold water soaks your clothes.</p><p>You reach the far bank tired and embarrassed. Andai helps you steady yourself.</p><p>“Do not let one bad crossing defeat you,” she says. “And do not let one good crossing make you careless.”</p>${lessonBox(2)}<p>The last light fades as you walk toward the palms.</p>`}
+]},
+{title:'Night in the palm grove',place:'A roadside grove south of Madurai',paragraphs:['At night, you stop beneath palmyra palms. Other travellers share the fire: a woman taking flowers to market, a musician with a small yāl, and a family on the way to visit relatives.','They come from different places, but each offers something: water, a story, a song, or a place beside the fire.','The musician asks if you know any poems. Andai looks at you. It is your turn to remember what she has taught you.'],choices:[
+{label:'Recite the lines you know and listen to the musician’s reply.',learn:4,transition:`<p>You speak the lines you know, and the musician answers with a tune on the yāl. The poem sounds different beside the fire—older, wider, and more alive.</p><p>Before dawn, Andai points to the last rainwater running between the roots of the palms.</p><p>“Do you remember the river?” she asks. “The poem remembers it too.”</p>${lessonBox(3)}<p>At dawn, you and Andai leave the grove and follow the road toward Madurai.</p>`},
+{label:'Help the family prepare the evening meal.',learn:4,transition:`<p>You help gather water and share food beside the fire. By morning, the travellers feel less like strangers.</p><p>As everyone prepares to leave, Andai watches the paths divide in different directions.</p><p>“Each of us is carried onward,” she says. “Sometimes by choice, sometimes by the road itself.”</p>${lessonBox(3)}<p>After thanks and farewells, you and Andai begin the last stretch to Madurai.</p>`},
+{label:'Sleep early so you will be ready for Madurai.',learn:4,transition:`<p>You sleep deeply beneath the palms. Before sunrise, Andai wakes you while the grove is still quiet.</p><p>Dew shines on the ground. Far away, you can hear water moving over stones.</p><p>“The river keeps going, even in the dark,” Andai says. “So do we.”</p>${lessonBox(3)}<p>With fresh strength, you begin the last part of the road to Madurai.</p>`}
+]},
+{title:'The pearls find their path',place:'Madurai’s market street',paragraphs:['By midday, you and Andai enter Madurai. The city is louder than Korkai. Carts creak through narrow streets. Sellers call out prices for grain, cloth, flowers, spices, oil, and metal goods.','Andai leads you to Nallur’s jeweller’s shop. Small lamps shine on trays of beads, gold wire, shells, and polished stones. Nallur opens the sealed pearl pouch and places the pearls on a dark cloth.','One by one, he turns them in the light. “Good pearls,” he says. “Round. Clean. These will make fine ornaments.” He weighs them, agrees on a fair price, and gives Andai a small cloth purse of payment.','You keep looking at the pearls. “Who will wear them?” you ask.','Nallur smiles. “Many kinds of people. A merchant’s wife may wear pearls in her ears or woven into her hair. Her family may live near the market, above a shop or behind a busy courtyard. They trade cloth, spices, salt, metal goods, or grain. They wear fine things when guests come, when families marry, and when festivals fill the city.”','You point to small gold settings. “And these?”','“Those may become earrings for a bride,” Nallur says. “Her family may come from a farming village outside Madurai. A wedding can bring many families together. Jewellery is not only beauty. It is also a gift, a memory, and sometimes a family’s savings.”','You look toward a larger tray where a worker threads pearls beside thin gold leaves. “Will anyone in the palace wear them?”','“Perhaps,” says Nallur. “Some pearls may go to people who serve the royal household. Some may be bought by wealthy families who visit the palace. A few may be made into ornaments for ceremonies, gifts, or members of the ruler’s family.”','“So a pearl can belong to many people before it belongs to one person,” you say.','Andai nods. “A pearl does not belong only to a palace. It begins in the sea. A diver finds it. Someone sorts it. Traders carry it. Craftspeople set it into gold. At last, someone wears it on a day they want to remember.”','Nallur smiles. “That is well said.”'],choices:[
+{label:'Ask how craftspeople set a pearl into gold.',learn:5,transition:`<p>Nallur shows you how a tiny gold setting can hold a pearl without hiding its light. You watch carefully as his worker prepares a finished tray for delivery.</p><p>Andai sees you looking at the gold and says, “Fine work deserves respect. But gold does not make one person greater than another.”</p>${lessonBox(4)}<p>Soon, Nallur invites you and Andai to walk with his worker toward the royal compound.</p>`},
+{label:'Ask more about the people who live near the palace.',learn:5,transition:`<p>Nallur tells you that a palace depends on many people: guards, attendants, cooks, scribes, musicians, craft workers, merchants, and visitors.</p><p>Andai nods. “Remember that when you see it. A palace looks grand because many ordinary hands keep it moving.”</p>${lessonBox(4)}<p>When Nallur’s worker prepares a jewellery tray for delivery, he invites you and Andai to walk with her.</p>`},
+{label:'Help Andai count and secure the payment.',learn:5,transition:`<p>You and Andai count the payment carefully, then tie the purse safely beneath her travel wrap. Nallur sees your care and smiles.</p><p>Andai says, “The person who makes a fair count is no less important than the person who wears gold.”</p>${lessonBox(4)}<p>When Nallur’s worker prepares a jewellery tray for delivery, he invites you and Andai to walk with her.</p>`}
+]},
+{title:'A glimpse of the royal compound',place:'Madurai, near the Pandyan palace',paragraphs:['Nallur looks at you with amused kindness. “You have travelled far, and you ask good questions. My worker is taking a tray of finished ornaments to the royal compound this afternoon. You and Andai may walk with her—if you stay close and do not block the way.”','You follow the worker through busy streets toward a guarded entrance. You do not enter private rooms. But from a shaded outer courtyard, you see attendants carrying baskets, cloth, lamps, and written accounts. Merchants wait. Petitioners speak to officials. Musicians pass through a hall beyond.','The jewellery tray is checked by a household official. You see a pearl ornament catch the light before it disappears into the compound.','You see guards at the gate, but you also see the worker carrying the jewellery tray, the attendant checking it, the scribe recording it, and the people waiting in the shade.','Andai speaks quietly. “Now you understand the last lines. Do not stare only at the great people. See everyone who makes this place work.”'],choices:[
+{label:'Watch the workers as carefully as the guards and officials.',transition:'You watch the hands that carry, record, check, sweep, cook, and guide visitors through the courtyard. The royal compound seems less like a distant wonder and more like a place made by many people.'},
+{label:'Ask the worker what she likes about making jewellery.',transition:'The worker says she likes the careful work: shaping gold, setting a pearl, and knowing that something small can bring joy to a person she may never meet.'},
+{label:'Stand quietly and take in the wonder of the place.',transition:'You stand quietly beneath the shade. You remember the sea at Korkai, the river, the palm grove, and Nallur’s workshop. For a moment, they all seem connected.'}
+]}
+];
+const $=id=>document.getElementById(id);
+function learnedLines(){return poemLessons.slice(0,Math.min(state.learned,poemLessons.length)).map(x=>x.tamil).join('\n')}
+function renderRoute(){$('route').innerHTML=route.map((n,i)=>`<div class="stop ${i<state.scene?'done':i===state.scene?'current':''}"><span class="dot"></span><span>${n}</span></div>`).join('')}
+function renderPoem(){const n=Math.min(state.learned,poemLessons.length);$('poemProgress').textContent=n?`Sections learned: ${n} of ${poemLessons.length}`:'The poem will be learned on the road.';$('poemLines').textContent=n?learnedLines():'யாதும் ஊரே; யாவரும் கேளிர்;'}
+function renderScene(){const s=scenes[state.scene];$('sceneMeta').innerHTML=`Scene ${String(state.scene+1).padStart(2,'0')} <span>• ${route[state.scene]}</span>`;$('scene-title').textContent=s.title;$('scenePlace').textContent=s.place;$('storyBody').innerHTML=s.paragraphs.map(p=>`<p>${p}</p>`).join('');$('choices').innerHTML=s.choices.map((c,i)=>`<button class="choice" type="button" data-choice="${i}"><span class="label">${c.label}</span></button>`).join('');$('endingActions').hidden=true;renderRoute();renderPoem();document.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',choose))}
+function choose(ev){const s=scenes[state.scene],c=s.choices[Number(ev.currentTarget.dataset.choice)];if(c.learn)state.learned=Math.max(state.learned,c.learn);if(state.scene===scenes.length-1)finish(c.transition);else showTransition(c.transition,scenes[state.scene+1])}
+function showTransition(text,next){$('sceneMeta').innerHTML=`Journey continues <span>• ${route[state.scene]} to ${route[state.scene+1]}</span>`;$('scene-title').textContent='The journey moves on';$('scenePlace').textContent='A pause between one place and the next';$('storyBody').innerHTML=`<section class="transition"><p class="step">The road continues</p><div class="transition-text">${text}</div><p class="next-place"><small>Next place</small>${next.place}</p><button class="continue" id="continueJourney" type="button">Continue to next scene</button></section>`;$('choices').innerHTML='';$('endingActions').hidden=true;renderRoute();renderPoem();$('continueJourney').addEventListener('click',()=>{state.scene+=1;renderScene();window.scrollTo({top:0,behavior:'smooth'})})}
+function finish(finalMoment){state.learned=poemLessons.length;$('sceneMeta').innerHTML='Journey complete <span>• Return to Korkai</span>';$('scene-title').textContent='Madurai remembered';$('scenePlace').textContent='A first journey, and a longer understanding';$('storyBody').innerHTML=`<p>${finalMoment}</p><p>Later, you and Andai begin the road back to Korkai. The pearl sale is complete, and the payment is safe.</p><p>Madurai grows smaller behind you, but its sounds remain in your memory: market calls, the jeweller’s tools, the movement of people in the royal compound, and the quiet words of the poem.</p><p>You have seen that the sea, the road, the workshop, the market, and the palace are connected. A pearl passes through many hands. So does a story.</p><section class="lesson"><p class="lesson-label">The full poem you learned</p><p class="tamil">${poemLessons.map(x=>x.tamil).join('\n').replace(/\n/g,'<br>')}</p><p class="meaning">Puranānūru 192, attributed to Kaṇiyaṉ Pūṅkuṉṟaṉār. The English meanings in this story are simple adaptations for young readers, not a full scholarly translation.</p></section>`;$('choices').innerHTML='';const a=$('endingActions');a.hidden=false;a.innerHTML='<button class="action" id="playAgain" type="button">Walk the road again</button><button class="action secondary" id="copyEnding" type="button">Copy ending</button><a class="home-link" href="https://tlab.projectxp.workers.dev/">Return to TLab</a>';renderRoute();renderPoem();$('playAgain').addEventListener('click',restart);$('copyEnding').addEventListener('click',()=>{const t=$('storyBody').innerText;navigator.clipboard?.writeText(t).then(()=>{$('copyEnding').textContent='Copied'}).catch(()=>{$('copyEnding').textContent='Select text to copy'})})}
+function restart(){state=initialState();renderScene();window.scrollTo({top:0,behavior:'smooth'})}$('restartTop').addEventListener('click',restart);renderScene();
 })();
-
-
-</script></body>
+</script>
+</body>
 </html>
